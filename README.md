@@ -1,5 +1,5 @@
-# regras
-Biblioteca para Execução de Regras (BER). 
+# shared
+Biblioteca para Controle de Concorrência 
 
 [<img src="https://api.travis-ci.org/kyriosdata/regras.svg?branch=master">](https://travis-ci.org/kyriosdata/regras)
 [![Dependency Status](https://www.versioneye.com/user/projects/5818f81589f0a91d55eb921c/badge.svg?style=flat-square)](https://www.versioneye.com/user/projects/5818f81589f0a91d55eb921c)
