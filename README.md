@@ -18,7 +18,7 @@ Biblioteca para Controle de Concorrência
 
 ## Como usar (via maven)?
 
-Acrescente a dependencia abaixo no arquivo pom.xml:
+Acrescente a dependência abaixo no arquivo pom.xml:
 
 <pre>
 &lt;dependency&gt;
