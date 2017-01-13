@@ -174,11 +174,11 @@ public class SharedTest {
     }
 
     @Test
-    public void semChamadasConcorrentes() throws Exception {
+    public void duasThreads() throws Exception {
         Shared shared = new Shared();
 
         Runnable runnable = () -> {
-            for (int i = 0; i < 10_250_000; i++) {
+            for (int i = 0; i < 100_000; i++) {
                 int k = shared.aloca();
                 shared.used(k);
             }
@@ -191,14 +191,17 @@ public class SharedTest {
         t2.start();
 
         t1.join();
+        t2.join();
 
         shared.limpa();
-        shared.limpa();
-        shared.limpa();
+
+        assertEquals(32, shared.totalLiberados());
+        assertEquals(0, shared.totalAlocados());
+        assertEquals(200_000, shared.getFirstFree());
     }
 
     @Test
-    public void comChamadasConcorrentes() throws Exception {
+    public void comVariasThreads() throws Exception {
         Shared shared = new Shared();
 
         Runnable decimo = () -> {
@@ -224,6 +227,10 @@ public class SharedTest {
         }
 
         shared.limpa();
+
+        assertEquals(32, shared.totalLiberados());
+        assertEquals(0, shared.totalAlocados());
+        assertEquals(12_500_000, shared.getFirstFree());
     }
 }
 

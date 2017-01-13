@@ -21,14 +21,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  * liberado e, consequentemente, pode ser consumido.
  */
 public class Shared {
-    // Quantidade de entradas vazias
-    private AtomicInteger totalFree;
-
-    // Primeira posição livre no buffer (ring)
-    private AtomicInteger firstFree;
-
-    // Indica se reader está trabalhando
-    private AtomicBoolean working;
 
     // Total de espaços vazios (tamanho do ring)
     private final int SIZE = 32;
@@ -36,12 +28,14 @@ public class Shared {
     // Máscara para "rotacionar" índices
     private final int MASCARA = SIZE - 1;
 
-    private int primeiroParaTratar;
+    // Indica se reader está trabalhando
+    private AtomicBoolean working;
+
+    private AtomicInteger ff = new AtomicInteger(0);
+    private int lf = SIZE - 1;
 
     // 32 bits (1 para cada valor do buffer)
     private int valoresUsados;
-
-    private int consumeCalled = 0;
 
     /**
      * Cria controle de concorrência para uso de 32 valores, 0 a 31 inclusive.
@@ -50,14 +44,11 @@ public class Shared {
      * ({@link #used(int)}) e, finalmente, consumido ({@link #limpa()} ()}).
      */
     public Shared() {
-        totalFree = new AtomicInteger(SIZE);
-        firstFree = new AtomicInteger(0);
 
         // Inicialmente nenhuma entrada está usada.
         valoresUsados = 0;
 
         working = new AtomicBoolean(false);
-        primeiroParaTratar = 0;
     }
 
     /**
@@ -95,25 +86,26 @@ public class Shared {
         return x | (1 << n);
     }
 
-    private AtomicInteger ff = new AtomicInteger(0);
-    private AtomicInteger lf = new AtomicInteger(31);
-
     public int totalAlocados() {
-        return 32 - totalLiberados();
+        return SIZE - totalLiberados();
     }
 
     public int totalLiberados() {
-        return lf.get() - ff.get() + 1;
+        return lf - ff.get() + 1;
     }
 
     public String liberados() {
-        return "Liberados: [" + (ff.get() & MASCARA) + ", " + (lf.get() & MASCARA) + "]";
+        return "Liberados: [" + (ff.get() & MASCARA) + ", " + (lf & MASCARA) + "]";
+    }
+
+    public int getFirstFree() {
+        return ff.get();
     }
 
     public int aloca() {
         while (true) {
             int candidato = ff.get();
-            if (candidato <= lf.get()) {
+            if (candidato <= lf) {
                 if (ff.compareAndSet(candidato, candidato + 1)) {
                     return candidato & MASCARA;
                 }
@@ -129,14 +121,14 @@ public class Shared {
      * usados.
      */
     public void limpa() {
-        int totalLiberados = lf.get() - ff.get() + 1;
-        int totalOcupados = 32 - totalLiberados;
+        int totalLiberados = lf - ff.get() + 1;
+        int totalOcupados = SIZE - totalLiberados;
 
         if (totalOcupados == 0) {
             return;
         }
 
-        int first = lf.get() + 1;
+        int first = lf + 1;
         int last = first + totalOcupados - 1;
 
         // Percorre alocados (antes e após os liberados)
@@ -156,7 +148,7 @@ public class Shared {
         }
 
         // Segundo. Atualiza último liberado
-        lf.addAndGet(totalUsados);
+        lf = lf + totalUsados;
     }
 
     private int getTotalUsados(int first, int last) {
@@ -174,7 +166,7 @@ public class Shared {
 
     /**
      * Sinaliza que valor anteriormente recuperado pelo método
-     * {@link #reserve()} já foi utilizado e, portanto, o
+     * {@link #aloca()} ()} já foi utilizado e, portanto, o
      * "consumidor" poderá fazer uso do mesmo.
      *
      * @param valor Valor anteriormente reservado e já empregado
