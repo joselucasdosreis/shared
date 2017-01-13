@@ -178,7 +178,7 @@ public class SharedTest {
         Shared shared = new Shared();
 
         Runnable runnable = () -> {
-            for (int i = 0; i < 100_000; i++) {
+            for (int i = 0; i < 10_000; i++) {
                 int k = shared.aloca();
                 shared.used(k);
             }
@@ -197,7 +197,7 @@ public class SharedTest {
 
         assertEquals(32, shared.totalLiberados());
         assertEquals(0, shared.totalAlocados());
-        assertEquals(200_000, shared.getFirstFree());
+        assertEquals(20_000, shared.getFirstFree());
     }
 
     @Test
@@ -205,7 +205,7 @@ public class SharedTest {
         Shared shared = new Shared();
 
         Runnable decimo = () -> {
-            for (int i = 0; i < 1_250_000; i++) {
+            for (int i = 0; i < 1_000; i++) {
                 int k = shared.aloca();
                 shared.used(k);
             }
@@ -230,7 +230,7 @@ public class SharedTest {
 
         assertEquals(32, shared.totalLiberados());
         assertEquals(0, shared.totalAlocados());
-        assertEquals(12_500_000, shared.getFirstFree());
+        assertEquals(10_000, shared.getFirstFree());
     }
 }
 

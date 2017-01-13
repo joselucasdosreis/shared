@@ -94,10 +94,6 @@ public class Shared {
         return lf - ff.get() + 1;
     }
 
-    public String liberados() {
-        return "Liberados: [" + (ff.get() & MASCARA) + ", " + (lf & MASCARA) + "]";
-    }
-
     public int getFirstFree() {
         return ff.get();
     }
