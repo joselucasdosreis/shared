@@ -10,10 +10,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- *
  * Classe empregada para gerir valores (índices) empregados
  * para identificar registros de log.
- *
+ * <p>
  * <p>Oferece serviço para controle de memória em três
  * fases: (a) reserva; (b) indicação de uso e (c)
  * consumo. A reserva simplesmente assegura que o
@@ -44,6 +43,12 @@ public class Shared {
 
     private int consumeCalled = 0;
 
+    /**
+     * Cria controle de concorrência para uso de 32 valores, 0 a 31 inclusive.
+     * Primeiro deve-se reservar o valor a ser utilizado
+     * ({@link #aloca()} ()}), indicar que está disponível para consumo
+     * ({@link #used(int)}) e, finalmente, consumido ({@link #limpa()} ()}).
+     */
     public Shared() {
         totalFree = new AtomicInteger(SIZE);
         firstFree = new AtomicInteger(0);
@@ -60,7 +65,6 @@ public class Shared {
      *
      * @param x O inteiro.
      * @param n O n-ésimo (zero-based) bit.
-     *
      * @return O valor do n-ésimo bit do inteiro.
      */
     public static int bitValue(int x, int n) {
@@ -71,9 +75,7 @@ public class Shared {
      * Define com o valor zero o n-ésimo (zero-based) bit do inteiro.
      *
      * @param x O inteiro.
-     *
      * @param n O n-ésimo bit (zero-based).
-     *
      * @return O inteiro com o n-ésimo (zero-based) bit 0. Possivelmente
      * o valor retornado é o mesmo daquele fornecido, se o bit já era 0.
      */
@@ -86,7 +88,6 @@ public class Shared {
      *
      * @param x O inteiro.
      * @param n O n-ésimo bit (zero-based).
-     *
      * @return O inteiro com o n-ésimo bit definido com o valor
      * 1 (possivelmente o mesmo valor fornecido).
      */
@@ -94,49 +95,81 @@ public class Shared {
         return x | (1 << n);
     }
 
-    /**
-     * Informação empregada exclusivamente para depuração.
-     *
-     * @return Informações para uso de depuração.
-     */
-    public String status() {
-        int totalUsados = 0;
+    private AtomicInteger ff = new AtomicInteger(0);
+    private AtomicInteger lf = new AtomicInteger(31);
 
-        for(int i = 0; i < SIZE; i++) {
-            if ((valoresUsados & i) != 1) {
-                totalUsados++;
+    public int totalAlocados() {
+        return 32 - totalLiberados();
+    }
+
+    public int totalLiberados() {
+        return lf.get() - ff.get() + 1;
+    }
+
+    public String liberados() {
+        return "Liberados: [" + (ff.get() & MASCARA) + ", " + (lf.get() & MASCARA) + "]";
+    }
+
+    public int aloca() {
+        while (true) {
+            int candidato = ff.get();
+            if (candidato <= lf.get()) {
+                if (ff.compareAndSet(candidato, candidato + 1)) {
+                    return candidato & MASCARA;
+                }
+            } else {
+                limpa();
             }
         }
-
-        return "\nWorking: " + working.get() + "\nUsados: " + totalUsados +
-                "\nTotal free: " + totalFree.get() + "\nFirst free: " +
-                firstFree.get();
     }
 
     /**
-     * Obtém valor reservado para uso. Nenhuma outra chamada
-     * irá recuperar esse valor, senão após ter sido usado e
-     * disponibilizado para uso novamente.
-     *
-     * <p>Após reservado, o valor poderá ser usado e, após tal,
-     * indique isso pelo método {@link #used(int)}.
-     *
-     * @return Identificador reservado para uso.
-     *
-     * @see #used(int)
-     * @see #consume()
+     * Processa valores já disponíveis. Ou seja,
+     * todos os que já foram alocados e também
+     * usados.
      */
-    public int reserve() {
-        while (true) {
-            int free = totalFree.get();
-            if (free > 0) {
-                if (totalFree.compareAndSet(free, free - 1)) {
-                    return firstFree.getAndIncrement() & MASCARA;
-                }
+    public void limpa() {
+        int totalLiberados = lf.get() - ff.get() + 1;
+        int totalOcupados = 32 - totalLiberados;
+
+        if (totalOcupados == 0) {
+            return;
+        }
+
+        int first = lf.get() + 1;
+        int last = first + totalOcupados - 1;
+
+        // Percorre alocados (antes e após os liberados)
+        // enquanto forem usados.
+        int totalUsados = getTotalUsados(first, last);
+
+        // Alocados usados é |[first, ...]| = totalUsados
+        // (consuma-os e os retorne para a lista de livres)
+
+        // < CONSOME AQUI >
+
+        // Libere para reutilização
+        // Primeiro. Indique que não estão mais usados
+        int lastUsed = first + totalUsados - 1;
+        for (int i = first; i <= lastUsed; i++) {
+            cls(valoresUsados, i & MASCARA);
+        }
+
+        // Segundo. Atualiza último liberado
+        lf.addAndGet(totalUsados);
+    }
+
+    private int getTotalUsados(int first, int last) {
+        int totalUsados = 0;
+        for (int i = first; i <= last; i++) {
+            int indice = i & MASCARA;
+            if (bitValue(valoresUsados, indice) == 1) {
+                totalUsados++;
             } else {
-                //consume();
+                break;
             }
         }
+        return totalUsados;
     }
 
     /**
@@ -146,84 +179,12 @@ public class Shared {
      *
      * @param valor Valor anteriormente reservado e já empregado
      *              pelo produtor.
-     *
-     * @see #reserve()
-     * @see #consume()
+     * @see #aloca()
+     * @see #limpa()
      */
     public void used(int valor) {
-        valoresUsados = valoresUsados | valor;
-    }
-
-    /**
-     * Valores reservados e também já utilizados são consumidos
-     * pelo presente método e, imediatamente após, liberados para
-     * novo ciclo (reserva, uso, consumo).
-     *
-     * @see #reserve()
-     * @see #used(int)
-     */
-    public void consume() {
-
-        // Não inicia se há trabalho em andamento
-        if (working.getAndSet(true)) {
-            return;
-        }
-
-        int free = totalFree.get();
-
-        while (true) {
-
-            // Retorne se não há o que tratar
-            if (free == SIZE) {
-                working.set(false);
-                return;
-            }
-
-            int totalParaTratar = SIZE - free;
-
-            // Faixa "candidata" para ser tratada
-            int first = primeiroParaTratar & MASCARA;
-            int last = (first + totalParaTratar - 1) & MASCARA;
-
-            //System.out.println("first: " + first + " Last: " + last + " Tratar: " + totalParaTratar + " Free: " + free);
-
-            // Percorre as "reservadas" de first até last
-            // nessa ordem, enquanto estiverem "valoresUsados"
-            int lu = -1;
-            int i = first;
-            while (i <= last && (valoresUsados & i) != 0) {
-               lu = i;
-               i++;
-            }
-
-            // Não há o que fazer se não houver "usada"
-            if (lu < 0) {
-                return;
-            }
-
-            // NESSE PONTO SABE-SE
-            // (a) há pelo menos uma usada
-            // (b) faixa das valoresUsados é de first até lu, inclusive
-
-            // Atualiza total da lista "final"
-            totalParaTratar = lu - first + 1;
-
-            // Repasse <first, lu> para tratamento, nessa ordem.
-
-            // Limpa faixa de valoresUsados (<first,lu>)
-            for (int k = first; k <= lu; k++) {
-                valoresUsados = valoresUsados & (~k);
-            }
-
-            // Atualiza próximo a ser tratado
-            primeiroParaTratar = primeiroParaTratar + totalParaTratar;
-
-            //System.out.println("first: " + first + " lu: " + lu + " Tratar: " + totalParaTratar + " Free: " + free);
-
-            // Liberar tratados
-            free = totalFree.addAndGet(totalParaTratar);
-
-            System.out.println(++consumeCalled);
-        }
+        // Identifica índice correspondente ao valor
+        int indice = valor & MASCARA;
+        valoresUsados = set(valoresUsados, indice);
     }
 }

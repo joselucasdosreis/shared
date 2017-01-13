@@ -7,6 +7,110 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class SharedTest {
 
     @Test
+    public void verificaEstadoInicial() {
+        Shared s = new Shared();
+        assertEquals(32, s.totalLiberados());
+        assertEquals(0, s.totalAlocados());
+    }
+
+    @Test
+    public void estadoAposDuasAlocacoes() {
+        Shared s = new Shared();
+        assertEquals(0, s.aloca());
+        assertEquals(1, s.aloca());
+
+        assertEquals(30, s.totalLiberados());
+        assertEquals(2, s.totalAlocados());
+    }
+
+    @Test
+    public void alocaUsaLibera() {
+        Shared s = new Shared();
+        assertEquals(0, s.aloca());
+
+        s.used(0);
+        s.limpa();
+
+        assertEquals(32, s.totalLiberados());
+        assertEquals(0, s.totalAlocados());
+    }
+
+    @Test
+    public void alocaUsaLiberaTodos() {
+        Shared s = new Shared();
+
+        for (int i = 0; i < 32; i++) {
+            assertEquals(i, s.aloca());
+            s.used(i);
+        }
+
+        assertEquals(32, s.totalAlocados());
+        assertEquals(0, s.totalLiberados());
+
+        s.limpa();
+
+        assertEquals(0, s.totalAlocados());
+        assertEquals(32, s.totalLiberados());
+    }
+
+    @Test
+    public void alocaSemUsarLiberacaoNaoLimpa() {
+        Shared s = new Shared();
+
+        for (int i = 0; i < 32; i++) {
+            assertEquals(i, s.aloca());
+        }
+
+        s.limpa();
+
+        assertEquals(32, s.totalAlocados());
+        assertEquals(0, s.totalLiberados());
+    }
+
+    @Test
+    public void alocaUsaLiberaForcandoCircularidade() {
+        Shared shared = new Shared();
+
+        // 32 alocados
+        for (int i = 0; i < 32; i++) {
+            assertEquals(i, shared.aloca());
+        }
+
+        assertEquals(32, shared.totalAlocados());
+        assertEquals(0, shared.totalLiberados());
+
+        // 1 usado
+        shared.used(0);
+        assertEquals(32, shared.totalAlocados());
+        assertEquals(0, shared.totalLiberados());
+
+        // Único usado é limpado
+        shared.limpa();
+
+        assertEquals(31, shared.totalAlocados());
+        assertEquals(1, shared.totalLiberados());
+
+        // Aloca o único liberado
+        // 32 alocados, 0 liberados
+        int unicoLiberado = shared.aloca();
+        assertEquals(0, unicoLiberado);
+        assertEquals(32, shared.totalAlocados());
+        assertEquals(0, shared.totalLiberados());
+
+        // 32 usados
+        for (int i = 0; i < 32; i++) {
+            shared.used(i);
+        }
+
+        // TODOS ALOCADOS E USADOS
+        // Ao chamar aloca() -> chamar limpa() e alocar o primeiro 0.
+        int alocado = shared.aloca();
+        assertEquals(1, alocado);
+        assertEquals(1, shared.totalAlocados());
+        assertEquals(31, shared.totalLiberados());
+    }
+
+    @Test
     public void setUnsetBits() {
         int v = 0;
 
@@ -49,11 +153,9 @@ public class SharedTest {
     public void reservasExecutadasCorretamente() throws Exception {
         Shared shared = new Shared();
 
-        System.out.println(shared.status());
-
         Runnable facaReservas = () -> {
             for (int i = 0; i < 16; i++) {
-                int k = shared.reserve();
+                int k = shared.aloca();
                 shared.used(k);
             }
         };
@@ -67,7 +169,8 @@ public class SharedTest {
         t1.join();
         t2.join();
 
-        System.out.println(shared.status());
+        assertEquals(0, shared.totalLiberados());
+        assertEquals(32, shared.totalAlocados());
     }
 
     @Test
@@ -76,11 +179,9 @@ public class SharedTest {
 
         Runnable runnable = () -> {
             for (int i = 0; i < 10_250_000; i++) {
-                int k = shared.reserve();
+                int k = shared.aloca();
                 shared.used(k);
             }
-
-            System.out.println("Reached the end...");
         };
 
         Thread t1 = new Thread(runnable);
@@ -91,11 +192,9 @@ public class SharedTest {
 
         t1.join();
 
-        shared.consume();
-        shared.consume();
-        shared.consume();
-
-        System.out.println(shared.status());
+        shared.limpa();
+        shared.limpa();
+        shared.limpa();
     }
 
     @Test
@@ -104,7 +203,7 @@ public class SharedTest {
 
         Runnable decimo = () -> {
             for (int i = 0; i < 1_250_000; i++) {
-                int k = shared.reserve();
+                int k = shared.aloca();
                 shared.used(k);
             }
         };
@@ -121,19 +220,10 @@ public class SharedTest {
         }
 
         for (int i = 0; i < 10; i++) {
-            System.out.println(threads[i].isAlive());
+            threads[i].join();
         }
 
-        shared.consume();
-
-        System.out.println("Iniciando laco consume...");
-        for (int i = 0; i < 10; i++) {
-            Thread.sleep(500);
-            shared.consume();
-        }
-
-        System.out.println(shared.status());
+        shared.limpa();
     }
-
 }
 
