@@ -10,24 +10,21 @@ public class SharedTest {
     public void setUnsetBits() {
         int v = 0;
 
-        // SET: x | (1 << n)
-        // CLS: x & ~(1 << n)
+        // Um inteiro qualquer
+        int random = (int)(Math.random() * Integer.MAX_VALUE);
 
-        // bit 0
-        assertEquals(1, set(0, 0));
-        assertEquals(0, cls(1, 0));
+        for (int i = 0; i < 32; i++) {
+            int bit = Shared.bitValue(random, i);
 
-        // bit 1
-        assertEquals(2, set(0, 1));
-        assertEquals(0, cls(2, 1));
-    }
+            int afterSet = Shared.set(random, i);
+            assertEquals(1, Shared.bitValue(afterSet, i), "Valor: " + random + " i: " + i);
 
-    public int set(int x, int n) {
-        return x | (1 << n);
-    }
+            int afterCls = Shared.cls(random, i);
+            assertEquals(0, Shared.bitValue(afterCls, i), "Valor: " + random + " i: " + i);
 
-    public int cls(int x, int n) {
-        return x & ~(1 << n);
+            int calculado = bit == 0 ? afterCls : afterSet;
+            assertEquals(random, calculado, "Valor: " + random + " i: " + i);
+        }
     }
 
     @Test

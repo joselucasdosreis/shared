@@ -56,6 +56,45 @@ public class Shared {
     }
 
     /**
+     * Obtém o valor do n-ésimo bit do inteiro.
+     *
+     * @param x O inteiro.
+     * @param n O n-ésimo (zero-based) bit.
+     *
+     * @return O valor do n-ésimo bit do inteiro.
+     */
+    public static int bitValue(int x, int n) {
+        return (x & (1 << n)) >>> n;
+    }
+
+    /**
+     * Define com o valor zero o n-ésimo (zero-based) bit do inteiro.
+     *
+     * @param x O inteiro.
+     *
+     * @param n O n-ésimo bit (zero-based).
+     *
+     * @return O inteiro com o n-ésimo (zero-based) bit 0. Possivelmente
+     * o valor retornado é o mesmo daquele fornecido, se o bit já era 0.
+     */
+    public static int cls(int x, int n) {
+        return x & ~(1 << n);
+    }
+
+    /**
+     * Define com o valor 1 o n-ésimo (zero-based) bit do inteiro.
+     *
+     * @param x O inteiro.
+     * @param n O n-ésimo bit (zero-based).
+     *
+     * @return O inteiro com o n-ésimo bit definido com o valor
+     * 1 (possivelmente o mesmo valor fornecido).
+     */
+    public static int set(int x, int n) {
+        return x | (1 << n);
+    }
+
+    /**
      * Informação empregada exclusivamente para depuração.
      *
      * @return Informações para uso de depuração.
@@ -64,7 +103,7 @@ public class Shared {
         int totalUsados = 0;
 
         for(int i = 0; i < SIZE; i++) {
-            if ((valoresUsados & i) != 0) {
+            if ((valoresUsados & i) != 1) {
                 totalUsados++;
             }
         }
