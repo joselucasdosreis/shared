@@ -39,8 +39,10 @@ public class Shared {
 
     private int primeiroParaTratar;
 
-    // Identifica entradas já usadas
-    private byte[] usadas;
+    // Identifica entradas já valoresUsados
+    private byte[] valoresUsados;
+
+    private int consumeCalled = 0;
 
     public Shared(int size) {
         totalFree = new AtomicInteger(size);
@@ -49,7 +51,10 @@ public class Shared {
         this.size = size;
 
         // Inicialmente nenhuma entrada está usada.
-        usadas = new byte[size];
+        valoresUsados = new byte[size];
+        for (int i = 0; i < size; i++) {
+            valoresUsados[i] = 0;
+        }
 
         mascara = size - 1;
 
@@ -63,13 +68,15 @@ public class Shared {
      * @return Informações para uso de depuração.
      */
     public String status() {
-        int totalUsadas = 0;
-        for (byte b : usadas) {
-            if (b != 0) {
-                totalUsadas++;
+        int totalUsados = 0;
+
+        for(int i = 0; i < size; i++) {
+            if (valoresUsados[i] == 1) {
+                totalUsados++;
             }
         }
-        return "\nWorking: " + working.get() + "\nUsadas: " + totalUsadas +
+
+        return "\nWorking: " + working.get() + "\nUsados: " + totalUsados +
                 "\nTotal free: " + totalFree.get() + "\nFirst free: " +
                 firstFree.get();
     }
@@ -92,10 +99,10 @@ public class Shared {
             int free = totalFree.get();
             if (free > 0) {
                 if (totalFree.compareAndSet(free, free - 1)) {
-                    return firstFree.getAndIncrement() & mascara;
+                    return firstFree.getAndIncrement() % size;
                 }
             } else {
-                consume();
+                //consume();
             }
         }
     }
@@ -112,7 +119,7 @@ public class Shared {
      * @see #consume()
      */
     public void used(int valor) {
-        usadas[valor] = (byte)0xff;
+        valoresUsados[valor] = (byte)1;
     }
 
     /**
@@ -146,13 +153,13 @@ public class Shared {
             int first = primeiroParaTratar & mascara;
             int last = (first + totalParaTratar - 1) & mascara;
 
-            System.out.println("first: " + first + " Last: " + last + " Tratar: " + totalParaTratar + " Free: " + free);
+            //System.out.println("first: " + first + " Last: " + last + " Tratar: " + totalParaTratar + " Free: " + free);
 
             // Percorre as "reservadas" de first até last
-            // nessa ordem, enquanto estiverem "usadas"
+            // nessa ordem, enquanto estiverem "valoresUsados"
             int lu = -1;
             int i = first;
-            while (i <= last && usadas[i] != 0) {
+            while (i <= last && valoresUsados[i] != 0) {
                lu = i;
                i++;
             }
@@ -164,25 +171,27 @@ public class Shared {
 
             // NESSE PONTO SABE-SE
             // (a) há pelo menos uma usada
-            // (b) faixa das usadas é de first até lu, inclusive
+            // (b) faixa das valoresUsados é de first até lu, inclusive
 
             // Atualiza total da lista "final"
             totalParaTratar = lu - first + 1;
 
             // Repasse <first, lu> para tratamento, nessa ordem.
 
-            // Limpa faixa de usadas (<first,lu>)
+            // Limpa faixa de valoresUsados (<first,lu>)
             for (int k = first; k <= lu; k++) {
-                usadas[k] = (byte)0x00;
+                valoresUsados[k] = (byte)0x00;
             }
 
             // Atualiza próximo a ser tratado
             primeiroParaTratar = primeiroParaTratar + totalParaTratar;
 
-            System.out.println("first: " + first + " lu: " + lu + " Tratar: " + totalParaTratar + " Free: " + free);
+            //System.out.println("first: " + first + " lu: " + lu + " Tratar: " + totalParaTratar + " Free: " + free);
 
             // Liberar tratados
             free = totalFree.addAndGet(totalParaTratar);
+
+            System.out.println(++consumeCalled);
         }
     }
 }
