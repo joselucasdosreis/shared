@@ -124,6 +124,7 @@ public class Shared {
      * @see #used(int)
      */
     public void consume() {
+
         // Não inicia se há trabalho em andamento
         if (working.getAndSet(true)) {
             return;
@@ -143,7 +144,9 @@ public class Shared {
 
             // Faixa "candidata" para ser tratada
             int first = primeiroParaTratar & mascara;
-            int last = first + totalParaTratar - 1;
+            int last = (first + totalParaTratar - 1) & mascara;
+
+            System.out.println("first: " + first + " Last: " + last + " Tratar: " + totalParaTratar + " Free: " + free);
 
             // Percorre as "reservadas" de first até last
             // nessa ordem, enquanto estiverem "usadas"
@@ -175,6 +178,8 @@ public class Shared {
 
             // Atualiza próximo a ser tratado
             primeiroParaTratar = primeiroParaTratar + totalParaTratar;
+
+            System.out.println("first: " + first + " lu: " + lu + " Tratar: " + totalParaTratar + " Free: " + free);
 
             // Liberar tratados
             free = totalFree.addAndGet(totalParaTratar);
