@@ -31,32 +31,25 @@ public class Shared {
     // Indica se reader está trabalhando
     private AtomicBoolean working;
 
-    // Máscara para "rotacionar" índices
-    private int mascara;
-
     // Total de espaços vazios (tamanho do ring)
-    private int size;
+    private final int SIZE = 32;
+
+    // Máscara para "rotacionar" índices
+    private final int MASCARA = SIZE - 1;
 
     private int primeiroParaTratar;
 
-    // Identifica entradas já valoresUsados
-    private byte[] valoresUsados;
+    // 32 bits (1 para cada valor do buffer)
+    private int valoresUsados;
 
     private int consumeCalled = 0;
 
-    public Shared(int size) {
-        totalFree = new AtomicInteger(size);
+    public Shared() {
+        totalFree = new AtomicInteger(SIZE);
         firstFree = new AtomicInteger(0);
 
-        this.size = size;
-
         // Inicialmente nenhuma entrada está usada.
-        valoresUsados = new byte[size];
-        for (int i = 0; i < size; i++) {
-            valoresUsados[i] = 0;
-        }
-
-        mascara = size - 1;
+        valoresUsados = 0;
 
         working = new AtomicBoolean(false);
         primeiroParaTratar = 0;
@@ -70,8 +63,8 @@ public class Shared {
     public String status() {
         int totalUsados = 0;
 
-        for(int i = 0; i < size; i++) {
-            if (valoresUsados[i] == 1) {
+        for(int i = 0; i < SIZE; i++) {
+            if ((valoresUsados & i) != 0) {
                 totalUsados++;
             }
         }
@@ -99,7 +92,7 @@ public class Shared {
             int free = totalFree.get();
             if (free > 0) {
                 if (totalFree.compareAndSet(free, free - 1)) {
-                    return firstFree.getAndIncrement() % size;
+                    return firstFree.getAndIncrement() & MASCARA;
                 }
             } else {
                 //consume();
@@ -119,7 +112,7 @@ public class Shared {
      * @see #consume()
      */
     public void used(int valor) {
-        valoresUsados[valor] = (byte)1;
+        valoresUsados = valoresUsados | valor;
     }
 
     /**
@@ -142,16 +135,16 @@ public class Shared {
         while (true) {
 
             // Retorne se não há o que tratar
-            if (free == size) {
+            if (free == SIZE) {
                 working.set(false);
                 return;
             }
 
-            int totalParaTratar = size - free;
+            int totalParaTratar = SIZE - free;
 
             // Faixa "candidata" para ser tratada
-            int first = primeiroParaTratar & mascara;
-            int last = (first + totalParaTratar - 1) & mascara;
+            int first = primeiroParaTratar & MASCARA;
+            int last = (first + totalParaTratar - 1) & MASCARA;
 
             //System.out.println("first: " + first + " Last: " + last + " Tratar: " + totalParaTratar + " Free: " + free);
 
@@ -159,7 +152,7 @@ public class Shared {
             // nessa ordem, enquanto estiverem "valoresUsados"
             int lu = -1;
             int i = first;
-            while (i <= last && valoresUsados[i] != 0) {
+            while (i <= last && (valoresUsados & i) != 0) {
                lu = i;
                i++;
             }
@@ -180,7 +173,7 @@ public class Shared {
 
             // Limpa faixa de valoresUsados (<first,lu>)
             for (int k = first; k <= lu; k++) {
-                valoresUsados[k] = (byte)0x00;
+                valoresUsados = valoresUsados & (~k);
             }
 
             // Atualiza próximo a ser tratado

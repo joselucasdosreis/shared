@@ -7,6 +7,30 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class SharedTest {
 
     @Test
+    public void setUnsetBits() {
+        int v = 0;
+
+        // SET: x | (1 << n)
+        // CLS: x & ~(1 << n)
+
+        // bit 0
+        assertEquals(1, set(0, 0));
+        assertEquals(0, cls(1, 0));
+
+        // bit 1
+        assertEquals(2, set(0, 1));
+        assertEquals(0, cls(2, 1));
+    }
+
+    public int set(int x, int n) {
+        return x | (1 << n);
+    }
+
+    public int cls(int x, int n) {
+        return x & ~(1 << n);
+    }
+
+    @Test
     public void circularidadeSemModulo() {
         int size = 32; // 2^5
         int mask = size - 1;
@@ -26,12 +50,12 @@ public class SharedTest {
 
     @Test
     public void reservasExecutadasCorretamente() throws Exception {
-        Shared shared = new Shared(10_250_000 + 10_250_000);
+        Shared shared = new Shared();
 
         System.out.println(shared.status());
 
         Runnable facaReservas = () -> {
-            for (int i = 0; i < 10_250_000; i++) {
+            for (int i = 0; i < 16; i++) {
                 int k = shared.reserve();
                 shared.used(k);
             }
@@ -46,14 +70,12 @@ public class SharedTest {
         t1.join();
         t2.join();
 
-        // TOTAL = 10_250_000 + 10_250_000
-        // Todos usados
         System.out.println(shared.status());
     }
 
     @Test
     public void semChamadasConcorrentes() throws Exception {
-        Shared shared = new Shared(1024);
+        Shared shared = new Shared();
 
         Runnable runnable = () -> {
             for (int i = 0; i < 10_250_000; i++) {
@@ -81,7 +103,7 @@ public class SharedTest {
 
     @Test
     public void comChamadasConcorrentes() throws Exception {
-        Shared shared = new Shared(1024);
+        Shared shared = new Shared();
 
         Runnable decimo = () -> {
             for (int i = 0; i < 1_250_000; i++) {
