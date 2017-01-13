@@ -10,45 +10,75 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Classe empregada para gerir valores (índices) empregados
- * para identificar registros de log.
- * <p>
- * <p>Oferece serviço para controle de memória em três
- * fases: (a) reserva; (b) indicação de uso e (c)
- * consumo. A reserva simplesmente assegura que o
- * valor obtido não será empregado por outro. A
- * indicação de uso informa que o uso do valor está
- * liberado e, consequentemente, pode ser consumido.
+ * Classe que encapsula operações de controle de concorrência
+ * em cenário de vários produtores e um único consumidor.
+ *
+ * <p>Orientações para o uso correto. O método
+ * {@link #aloca()} indica o desejo de produzir (algo), o retorno
+ * é um inteiro, valor de 0 a 31, inclusive, que unicamente identifica
+ * o que se deseja produzir.
+ *
+ * <p>A alocação não é suficiente para o
+ * consumo. Antes de ser consumido o valor alocado precisa ser
+ * "produzido" pelo método {@link #produz(int)}. O valor fornecido
+ * como argumento deve ser aquele obtido do método {@link #aloca()}.
+ *
+ * <p>O consumo propriamente dito ocorre pelo método {@link #consome(int, int)}.
+ * O usuário dessa classe deve sobrescrever esse método. Quando chamado
+ * sabe-se que a faixa de valores indicada foi produzida e pode ser
+ * consumida, independente do que isso significa para a aplciação
+ * em questão. Uma possibilidade é empregar os inteiros de 0 a 31 como
+ * índices de um <i>buffer pool</i>.
  */
 public class Shared {
 
-    // Total de espaços vazios (tamanho do ring)
+    // Tamanho da "lista circular" (ring buffer).
+    // Necessariamente uma potência de 2.
     private final int SIZE = 32;
 
     // Máscara para "rotacionar" índices
+    // Permite substituir "% SIZE" por "& MASCARA" (mais eficiente).
     private final int MASCARA = SIZE - 1;
 
-    // Indica se reader está trabalhando
-    private AtomicBoolean working;
+    // Empregada para evitar reentrância do consumidor.
+    private AtomicBoolean working = new AtomicBoolean(false);
 
+    // Indica primeira entrada livre (first free).
     private AtomicInteger ff = new AtomicInteger(0);
+
+    // Indica última entrada livre (las free)
     private int lf = SIZE - 1;
 
-    // 32 bits (1 para cada valor do buffer)
-    private int valoresUsados;
+    // 32 bits (1 para cada valor da lista circular)
+    private int valoresUsados = 0;
 
     /**
-     * Cria controle de concorrência para uso de 32 valores, 0 a 31 inclusive.
-     * Primeiro deve-se reservar o valor a ser utilizado
-     * ({@link #aloca()} ()}), indicar que está disponível para consumo
-     * ({@link #used(int)}) e, finalmente, consumido ({@link #limpa()} ()}).
+     * Consome a faixa de valores consecutivos indicada.
+     * Método deve ser sobrescrito com implementação
+     * relevante para o uso pretendido.
+     *
+     * <p>Após a execução desse métodos os valores
+     * na faixa fornecida estarão disponíveis para
+     * reutilização pelo método {@link #aloca()}.
+     *
+     * @param i Primeiro valor da faixa.
+     * @param f Último valor da faixa.
      */
-    public Shared() {
+    public void consome(int i, int f) {}
 
-        // Inicialmente nenhuma entrada está usada.
-        valoresUsados = 0;
-
-        working = new AtomicBoolean(false);
+    /**
+     * Indica a produção de informação associada
+     * ao valor fornecido.
+     *
+     * @param v O valor que identifica a produção.
+     *           Esse valor necessariamente deve ser
+     *           obtido do método {@link #aloca()}.
+     *
+     * @see #aloca()
+     * @see #limpa()
+     */
+    public void produz(int v) {
+        valoresUsados = set(valoresUsados, v);
     }
 
     /**
@@ -86,18 +116,43 @@ public class Shared {
         return x | (1 << n);
     }
 
+    /**
+     * Quantidade de entradas ocupadas (já alocadas).
+     *
+     * <p>Nenhuma das entradas, necessariamente, foi
+     * "produzida", mas seguramente já foi alocada.
+     *
+     * @return Número de entradas ocupadas.
+     */
     public int totalAlocados() {
         return SIZE - totalLiberados();
     }
 
+    /**
+     * Quantidade de entradas disponíveis para alocação.
+     *
+     * @return Número de entradas (valores) disponíveis
+     * para alocação imediata.
+     */
     public int totalLiberados() {
         return lf - ff.get() + 1;
     }
 
+    /**
+     * Empregada exclusivamente para teste.
+     *
+     * @return Primeiro valor livre para ser alocado.
+     */
     public int getFirstFree() {
         return ff.get();
     }
 
+    /**
+     * Realiza alocação de um valor.
+     *
+     * @return O identificador único, valor de 0 a 31, inclusive,
+     * que deve ser "produzido" e posteriormente consumido.
+     */
     public int aloca() {
         while (true) {
             int candidato = ff.get();
@@ -117,34 +172,33 @@ public class Shared {
      * usados.
      */
     public void limpa() {
-        int totalLiberados = lf - ff.get() + 1;
-        int totalOcupados = SIZE - totalLiberados;
 
-        if (totalOcupados == 0) {
+        // Evita reentrância
+        if (working.getAndSet(true)) {
             return;
         }
 
-        int first = lf + 1;
-        int last = first + totalOcupados - 1;
+        int fa = lf + 1;
+        int la = SIZE + ff.get() - 1;
 
-        // Percorre alocados (antes e após os liberados)
-        // enquanto forem usados.
-        int totalUsados = getTotalUsados(first, last);
+        // Percorre faixa de alocados pelo total de usados
+        int totalUsados = getTotalUsados(fa, la);
 
-        // Alocados usados é |[first, ...]| = totalUsados
-        // (consuma-os e os retorne para a lista de livres)
+        // Alocados e usados é |[fa, lu]| = totalUsados
+        int lu = fa + totalUsados - 1;
 
-        // < CONSOME AQUI >
+        // Consome entrada
+        consome(fa, lu);
 
-        // Libere para reutilização
-        // Primeiro. Indique que não estão mais usados
-        int lastUsed = first + totalUsados - 1;
-        for (int i = first; i <= lastUsed; i++) {
+        // Limpa indicação de uso
+        for (int i = fa; i <= lu; i++) {
             cls(valoresUsados, i & MASCARA);
         }
 
-        // Segundo. Atualiza último liberado
+        // Disponibiliza valores para reutilização
         lf = lf + totalUsados;
+
+        working.set(false);
     }
 
     private int getTotalUsados(int first, int last) {
@@ -158,21 +212,5 @@ public class Shared {
             }
         }
         return totalUsados;
-    }
-
-    /**
-     * Sinaliza que valor anteriormente recuperado pelo método
-     * {@link #aloca()} ()} já foi utilizado e, portanto, o
-     * "consumidor" poderá fazer uso do mesmo.
-     *
-     * @param valor Valor anteriormente reservado e já empregado
-     *              pelo produtor.
-     * @see #aloca()
-     * @see #limpa()
-     */
-    public void used(int valor) {
-        // Identifica índice correspondente ao valor
-        int indice = valor & MASCARA;
-        valoresUsados = set(valoresUsados, indice);
     }
 }

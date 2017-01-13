@@ -7,6 +7,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class SharedTest {
 
     @Test
+    public void consumidorNaoReentrante() {
+        Shared s = new Shared();
+
+        for(int i = 0; i < 1_000; i++) {
+            s.limpa();
+        }
+    }
+
+    @Test
     public void verificaEstadoInicial() {
         Shared s = new Shared();
         assertEquals(32, s.totalLiberados());
@@ -28,7 +37,7 @@ public class SharedTest {
         Shared s = new Shared();
         assertEquals(0, s.aloca());
 
-        s.used(0);
+        s.produz(0);
         s.limpa();
 
         assertEquals(32, s.totalLiberados());
@@ -41,7 +50,7 @@ public class SharedTest {
 
         for (int i = 0; i < 32; i++) {
             assertEquals(i, s.aloca());
-            s.used(i);
+            s.produz(i);
         }
 
         assertEquals(32, s.totalAlocados());
@@ -80,7 +89,7 @@ public class SharedTest {
         assertEquals(0, shared.totalLiberados());
 
         // 1 usado
-        shared.used(0);
+        shared.produz(0);
         assertEquals(32, shared.totalAlocados());
         assertEquals(0, shared.totalLiberados());
 
@@ -99,7 +108,7 @@ public class SharedTest {
 
         // 32 usados
         for (int i = 0; i < 32; i++) {
-            shared.used(i);
+            shared.produz(i);
         }
 
         // TODOS ALOCADOS E USADOS
@@ -156,7 +165,7 @@ public class SharedTest {
         Runnable facaReservas = () -> {
             for (int i = 0; i < 16; i++) {
                 int k = shared.aloca();
-                shared.used(k);
+                shared.produz(k);
             }
         };
 
@@ -180,7 +189,7 @@ public class SharedTest {
         Runnable runnable = () -> {
             for (int i = 0; i < 10_000; i++) {
                 int k = shared.aloca();
-                shared.used(k);
+                shared.produz(k);
             }
         };
 
@@ -207,7 +216,7 @@ public class SharedTest {
         Runnable decimo = () -> {
             for (int i = 0; i < 1_000; i++) {
                 int k = shared.aloca();
-                shared.used(k);
+                shared.produz(k);
             }
         };
 
