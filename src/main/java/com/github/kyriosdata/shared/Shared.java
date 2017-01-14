@@ -141,15 +141,6 @@ public class Shared {
     }
 
     /**
-     * Empregada exclusivamente para teste.
-     *
-     * @return Primeiro valor livre para ser alocado.
-     */
-    public int getFirstFree() {
-        return ff.get();
-    }
-
-    /**
      * Realiza alocação de um valor.
      *
      * @return O identificador único, valor de 0 a 31, inclusive,

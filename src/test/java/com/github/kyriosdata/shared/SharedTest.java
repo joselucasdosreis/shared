@@ -166,7 +166,7 @@ public class SharedTest {
      */
     @Test
     public void comVariasThreads() throws Exception {
-        Shared shared = new Shared();
+        SharedJustForTeste shared = new SharedJustForTeste();
 
         Runnable decimo = () -> {
             for (int i = 0; i < 36_000; i++) {
@@ -177,6 +177,7 @@ public class SharedTest {
 
         // CRIA
         Thread[] threads = new Thread[10];
+
         for (int i = 0; i < 10; i++) {
             threads[i] = new Thread(decimo);
         }
@@ -192,9 +193,31 @@ public class SharedTest {
 
         shared.limpa();
 
-        assertEquals(32, shared.totalLiberados());
-        assertEquals(0, shared.totalAlocados());
-        assertEquals(360_000, shared.getFirstFree());
+        assertEquals(360_000, shared.total());
+    }
+}
+
+class SharedJustForTeste extends Shared {
+    private int[] contador = new int[32];
+
+    @Override
+    public void consome(int i) {
+        contador[i] = contador[i] + 1;
+    }
+
+    public void output() {
+        for(int i = 0; i < 32; i++) {
+            System.out.println(i + ": " + contador[i]);
+        }
+    }
+
+    public int total() {
+        int total = 0;
+        for (int i = 0; i < 32; i++) {
+            total = total + contador[i];
+        }
+
+        return total;
     }
 }
 
