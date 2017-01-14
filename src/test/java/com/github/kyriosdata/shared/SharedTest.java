@@ -158,63 +158,18 @@ public class SharedTest {
         }
     }
 
-    @Test
-    public void reservasExecutadasCorretamente() throws Exception {
-        Shared shared = new Shared();
-
-        Runnable facaReservas = () -> {
-            for (int i = 0; i < 16; i++) {
-                int k = shared.aloca();
-                shared.produz(k);
-            }
-        };
-
-        Thread t1 = new Thread(facaReservas);
-        t1.start();
-
-        Thread t2 = new Thread(facaReservas);
-        t2.start();
-
-        t1.join();
-        t2.join();
-
-        assertEquals(0, shared.totalLiberados());
-        assertEquals(32, shared.totalAlocados());
-    }
-
-    @Test
-    public void duasThreads() throws Exception {
-        Shared shared = new Shared();
-
-        Runnable runnable = () -> {
-            for (int i = 0; i < 10_000; i++) {
-                int k = shared.aloca();
-                shared.produz(k);
-            }
-        };
-
-        Thread t1 = new Thread(runnable);
-        t1.start();
-
-        Thread t2 = new Thread(runnable);
-        t2.start();
-
-        t1.join();
-        t2.join();
-
-        shared.limpa();
-
-        assertEquals(32, shared.totalLiberados());
-        assertEquals(0, shared.totalAlocados());
-        assertEquals(20_000, shared.getFirstFree());
-    }
-
+    /**
+     * Executa 360.000 alocações, produções e "liberações".
+     * Ou seja, o esforço de 100 logs/s durante 1 hora.
+     *
+     * @throws Exception Possivelmente gerada.
+     */
     @Test
     public void comVariasThreads() throws Exception {
         Shared shared = new Shared();
 
         Runnable decimo = () -> {
-            for (int i = 0; i < 1_000; i++) {
+            for (int i = 0; i < 36_000; i++) {
                 int k = shared.aloca();
                 shared.produz(k);
             }
@@ -239,7 +194,7 @@ public class SharedTest {
 
         assertEquals(32, shared.totalLiberados());
         assertEquals(0, shared.totalAlocados());
-        assertEquals(10_000, shared.getFirstFree());
+        assertEquals(360_000, shared.getFirstFree());
     }
 }
 

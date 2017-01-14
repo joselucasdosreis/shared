@@ -15,20 +15,24 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * <p>Orientações para o uso correto. O método
  * {@link #aloca()} indica o desejo de produzir (algo), o retorno
- * é um inteiro, valor de 0 a 31, inclusive, que unicamente identifica
- * o que se deseja produzir.
+ * é um inteiro no intervalo fechado [0, 31], que unicamente
+ * identifica o que se deseja produzir. Em geral, o valor fornecido
+ * é o índice de um <i>array</i> ou permite identificar, de fato,
+ * o dado compartilhado, ou seja, esse valor funciona como um
+ * <i>handle</i> para a real informação.
  *
  * <p>A alocação não é suficiente para o
  * consumo. Antes de ser consumido o valor alocado precisa ser
  * "produzido" pelo método {@link #produz(int)}. O valor fornecido
  * como argumento deve ser aquele obtido do método {@link #aloca()}.
+ * Noutras palavras, uma chamada desse método com o argumento
+ * 7, por exemplo, indica que a informação associada ao valor
+ * 7 está disponível para consumo.
  *
- * <p>O consumo propriamente dito ocorre pelo método {@link #consome(int, int)}.
+ * <p>O consumo propriamente dito ocorre pelo método {@link #consome(int)}.
  * O usuário dessa classe deve sobrescrever esse método. Quando chamado
- * sabe-se que a faixa de valores indicada foi produzida e pode ser
- * consumida, independente do que isso significa para a aplciação
- * em questão. Uma possibilidade é empregar os inteiros de 0 a 31 como
- * índices de um <i>buffer pool</i>.
+ * sabe-se que a faixa de valores indicada foi produzida e deve ser
+ * consumida.
  */
 public class Shared {
 
@@ -53,18 +57,16 @@ public class Shared {
     private int valoresUsados = 0;
 
     /**
-     * Consome a faixa de valores consecutivos indicada.
-     * Método deve ser sobrescrito com implementação
-     * relevante para o uso pretendido.
+     * Consome a informação produzida e associada
+     * ao valor indicado.
      *
-     * <p>Após a execução desse métodos os valores
-     * na faixa fornecida estarão disponíveis para
+     * <p>Após a execução desse método o valor
+     * correspondente estará disponível para
      * reutilização pelo método {@link #aloca()}.
      *
-     * @param i Primeiro valor da faixa.
-     * @param f Último valor da faixa.
+     * @param v Valor a ser consumido.
      */
-    public void consome(int i, int f) {}
+    public void consome(int v) {}
 
     /**
      * Indica a produção de informação associada
@@ -179,21 +181,17 @@ public class Shared {
         }
 
         int fa = lf + 1;
-        int la = SIZE + ff.get() - 1;
+        int la = ff.get() - 1 + SIZE;
 
         // Percorre faixa de alocados pelo total de usados
-        int totalUsados = getTotalUsados(fa, la);
+        int totalUsados = usadosConsecutivosNaFaixa(fa, la);
 
         // Alocados e usados é |[fa, lu]| = totalUsados
         int lu = fa + totalUsados - 1;
 
         // Consome entrada
-        for(int i = fa; i <= lu; i++) {
-            consome(fa & MASCARA, lu & MASCARA);
-        }
-
-        // Limpa indicação de uso
         for (int i = fa; i <= lu; i++) {
+            consome(i & MASCARA);
             cls(valoresUsados, i & MASCARA);
         }
 
@@ -203,16 +201,14 @@ public class Shared {
         working.set(false);
     }
 
-    private int getTotalUsados(int first, int last) {
+    private int usadosConsecutivosNaFaixa(int first, int last) {
         int totalUsados = 0;
-        for (int i = first; i <= last; i++) {
-            int indice = i & MASCARA;
-            if (bitValue(valoresUsados, indice) == 1) {
-                totalUsados++;
-            } else {
-                break;
-            }
+        int i = first;
+        while (i <= last && bitValue(valoresUsados, i & MASCARA) == 1) {
+            i++;
+            totalUsados++;
         }
+
         return totalUsados;
     }
 }

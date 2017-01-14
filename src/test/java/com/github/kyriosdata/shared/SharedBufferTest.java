@@ -50,7 +50,7 @@ public class SharedBufferTest {
 
 class SharedBuffer extends Shared {
     @Override
-    public void consome(int i, int f) {
+    public void consome(int v) {
 
         System.out.println(LocalDateTime.now(Clock.systemUTC()));
     }
