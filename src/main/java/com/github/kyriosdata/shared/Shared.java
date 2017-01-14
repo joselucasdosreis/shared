@@ -188,7 +188,9 @@ public class Shared {
         int lu = fa + totalUsados - 1;
 
         // Consome entrada
-        consome(fa, lu);
+        for(int i = fa; i <= lu; i++) {
+            consome(fa & MASCARA, lu & MASCARA);
+        }
 
         // Limpa indicação de uso
         for (int i = fa; i <= lu; i++) {
