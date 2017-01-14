@@ -2,7 +2,7 @@ package com.github.kyriosdata.shared;
 
 import org.junit.jupiter.api.Test;
 
-import java.time.Clock;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -23,77 +23,81 @@ public class SharedBufferTest {
     }
 
     @Test
-    public void verificaChamada() {
-        SharedBuffer sb = new SharedBuffer();
-
-        sb.produz(sb.aloca());
-        sb.produz(sb.aloca());
-
-        // força chamada do consumidor.
-        sb.limpa();
-    }
-
-    @Test
     public void processo() throws Exception {
         TaskManager pm = new TaskManager();
-        pm.novoAgendamento(new Runnable() {
-            @Override
-            public void run() {
-                System.out.println(LocalDateTime.now());
-            }
-        });
+        pm.novoAgendamento(() -> System.out.println(LocalDateTime.now()));
 
         Thread.sleep(10000);
     }
 
-}
+    @Test
+    public void logFuncionamento() {
+        ILog log = new Log();
 
-class SharedBuffer extends Shared {
-    @Override
-    public void consome(int v) {
+        // Gerenciador de tarefas
+        // (para flush do conteúdo de log agendado)
+        TaskManager tm = new TaskManager();
+        tm.novoAgendamento(log);
 
-        System.out.println(LocalDateTime.now(Clock.systemUTC()));
+        log.info("ok");
+        log.warn("alerta");
+        log.error("erro");
+
+        try {
+            Thread.sleep(2000);
+        } catch (Exception exp) {}
     }
 }
 
 /**
  * Definição dos serviços de <i>logging</i>.
  */
-interface ILog {
+interface ILog extends Runnable {
     void info(String msg);
     void warn(String msg);
     void error(String msg);
 }
 
-class Log implements ILog, Runnable {
+class Log implements ILog {
 
     private final int SIZE = 32;
+    private final int INFO = 0;
+    private final int WARN = 1;
+    private final int ERROR = 2;
+
+    private String[] levelNames = { "INFO", "WARN", "ERROR" };
 
     private LogEvent[] eventos = new LogEvent[SIZE];
 
-    private SharedBuffer shared = new SharedBuffer();
+    private Shared shared;
 
     public Log() {
-        for(int i = 0; i < SIZE; i++) {
+        for (int i = 0; i < SIZE; i++) {
             eventos[i] = new LogEvent();
         }
 
-
+        shared = new Shared() {
+            @Override
+            public void consome(int v) {
+                byte[] bytes = packLogEvent(eventos[v]);
+                System.out.println(new String(bytes, StandardCharsets.UTF_8));
+            }
+        };
     }
 
     @Override
     public void info(String msg) {
-        log(0, msg);
+        log(INFO, msg);
     }
 
     @Override
     public void warn(String msg) {
-        log(1, msg);
+        log(WARN, msg);
     }
 
     @Override
     public void error(String msg) {
-        log(2, msg);
+        log(ERROR, msg);
     }
 
     private void log(int level, String msg) {
@@ -104,7 +108,7 @@ class Log implements ILog, Runnable {
 
         // Produz o evento
         eventos[v].instante = nowUTC;
-        eventos[v].level = (byte)level;
+        eventos[v].level = (byte) level;
         eventos[v].payload = msg;
 
         shared.produz(v);
@@ -112,19 +116,34 @@ class Log implements ILog, Runnable {
 
     @Override
     public void run() {
-        shared.limpa();
+        shared.flush();
+    }
+
+    /**
+     * Empacota um evento de log em uma sequência de bytes.
+     *
+     * @param event Evento a ser convertido em sequência de bytes.
+     *
+     * @return Sequência de bytes correspondente ao evento.
+     */
+    private byte[] packLogEvent(LogEvent event) {
+        String now = event.instante.format(DateTimeFormatter.ISO_ZONED_DATE_TIME);
+        String level = levelNames[event.level];
+
+        String log = String.format("%s %s %s", now, level, event.payload);
+
+        return log.getBytes(StandardCharsets.UTF_8);
+    }
+
+    /**
+     * Contêiner para um registro de log.
+     */
+    private class LogEvent {
+        public ZonedDateTime instante;
+        public byte level;
+        public String payload;
     }
 }
-
-/**
- * Contêiner para um registro de log.
- */
-class LogEvent {
-    public ZonedDateTime instante;
-    public byte level;
-    public String payload;
-}
-
 /**
  * Gerencia a execução de tarefas. Entre os serviços está o
  * agendamento de execução em intervalos de tempo específico
@@ -145,4 +164,8 @@ class TaskManager {
     public void novoAgendamento(Runnable r) {
         agenda.scheduleWithFixedDelay(r, 1000, 1000, TimeUnit.MILLISECONDS);
     }
+}
+
+class FileManager {
+
 }

@@ -11,7 +11,7 @@ public class SharedTest {
         Shared s = new Shared();
 
         for(int i = 0; i < 1_000; i++) {
-            s.limpa();
+            s.flush();
         }
     }
 
@@ -38,7 +38,7 @@ public class SharedTest {
         assertEquals(0, s.aloca());
 
         s.produz(0);
-        s.limpa();
+        s.flush();
 
         assertEquals(32, s.totalLiberados());
         assertEquals(0, s.totalAlocados());
@@ -56,7 +56,7 @@ public class SharedTest {
         assertEquals(32, s.totalAlocados());
         assertEquals(0, s.totalLiberados());
 
-        s.limpa();
+        s.flush();
 
         assertEquals(0, s.totalAlocados());
         assertEquals(32, s.totalLiberados());
@@ -70,7 +70,7 @@ public class SharedTest {
             assertEquals(i, s.aloca());
         }
 
-        s.limpa();
+        s.flush();
 
         assertEquals(32, s.totalAlocados());
         assertEquals(0, s.totalLiberados());
@@ -94,7 +94,7 @@ public class SharedTest {
         assertEquals(0, shared.totalLiberados());
 
         // Único usado é limpado
-        shared.limpa();
+        shared.flush();
 
         assertEquals(31, shared.totalAlocados());
         assertEquals(1, shared.totalLiberados());
@@ -112,7 +112,7 @@ public class SharedTest {
         }
 
         // TODOS ALOCADOS E USADOS
-        // Ao chamar aloca() -> chamar limpa() e alocar o primeiro 0.
+        // Ao chamar aloca() -> chamar flush() e alocar o primeiro 0.
         int alocado = shared.aloca();
         assertEquals(1, alocado);
         assertEquals(1, shared.totalAlocados());
@@ -191,7 +191,7 @@ public class SharedTest {
             threads[i].join();
         }
 
-        shared.limpa();
+        shared.flush();
 
         assertEquals(360_000, shared.total());
     }

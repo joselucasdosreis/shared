@@ -77,7 +77,7 @@ public class Shared {
      *           obtido do método {@link #aloca()}.
      *
      * @see #aloca()
-     * @see #limpa()
+     * @see #flush()
      */
     public void produz(int v) {
         valoresUsados = set(valoresUsados, v);
@@ -154,7 +154,7 @@ public class Shared {
                     return candidato & MASCARA;
                 }
             } else {
-                limpa();
+                flush();
             }
         }
     }
@@ -164,7 +164,7 @@ public class Shared {
      * todos os que já foram alocados e também
      * usados.
      */
-    public void limpa() {
+    public void flush() {
 
         // Evita reentrância
         if (working.getAndSet(true)) {
