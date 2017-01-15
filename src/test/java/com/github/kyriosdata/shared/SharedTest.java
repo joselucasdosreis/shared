@@ -3,6 +3,7 @@ package com.github.kyriosdata.shared;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SharedTest {
@@ -62,6 +63,7 @@ public class SharedTest {
 
         assertEquals(32, s.totalLiberados());
         assertEquals(0, s.totalAlocados());
+        assertFalse(s.produzido(0));
     }
 
     @Test
@@ -137,6 +139,17 @@ public class SharedTest {
         assertEquals(1, alocado);
         assertEquals(1, shared.totalAlocados());
         assertEquals(31, shared.totalLiberados());
+    }
+
+    private void showBits(int produzidos) {
+        for (int i = 0; i < 32; i++) {
+            System.out.print(Shared.bitValue(produzidos, i));
+            if ((i+1) % 4 == 0) {
+                System.out.print(" ");
+            }
+        }
+
+        System.out.println();
     }
 
     @Test

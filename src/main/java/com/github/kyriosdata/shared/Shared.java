@@ -200,12 +200,12 @@ public class Shared {
             for (int i = fa; i < lu; i++) {
                 int valor = i & MASCARA;
                 consome(valor, false);
-                cls(produzidos, valor);
+                produzidos = cls(produzidos, valor);
             }
 
             // Indica que se trata do ÚLTIMO
             consome(lu & MASCARA, true);
-            cls(produzidos, lu & MASCARA);
+            produzidos = cls(produzidos, lu & MASCARA);
 
             // Disponibiliza valores para reutilização
             lf = lf + totalUsados;
