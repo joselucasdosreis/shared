@@ -6,7 +6,6 @@
 
 package com.github.kyriosdata.shared;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -45,7 +44,7 @@ public class Shared {
     private final int MASCARA = SIZE - 1;
 
     // Empregada para evitar reentrância do consumidor.
-    private AtomicBoolean working = new AtomicBoolean(false);
+    private AtomicInteger working = new AtomicInteger(0);
 
     // Indica primeira entrada livre (first free).
     private AtomicInteger ff = new AtomicInteger(0);
@@ -86,6 +85,7 @@ public class Shared {
     public void produz(int v) {
         assert v > -1 && v < 32;
         produzidos = set(produzidos, v);
+        assert produzido(v) == true;
     }
 
     /**
@@ -174,6 +174,8 @@ public class Shared {
         }
     }
 
+    private static int aqui = 0;
+
     /**
      * Processa valores já disponíveis. Ou seja,
      * todos os que já foram alocados e também
@@ -182,24 +184,31 @@ public class Shared {
     public void flush() {
 
         // Evita reentrância
-        if (working.getAndSet(true)) {
+        if (!working.compareAndSet(0, 1)) {
             return;
         }
+
+        assert ++aqui < 2;
 
         int fa = lf + 1;
         int la = ff.get() - 1 + SIZE;
 
         // Obém o total de usados dentre os alocados
-        int totalUsados = usadosConsecutivosNaFaixa(fa, la);
+        int producao = totalDaProducao(fa, la);
 
-        if (totalUsados > 0) {
-            // Alocados e usados é |[fa, lu]| = totalUsados
-            int lu = lf + totalUsados;
+        if (producao > 0) {
+            // Alocados e usados é |[fa, lu]| = producao
+            int lu = lf + producao;
 
             // Consome entradas (exceto o último)
             for (int i = fa; i < lu; i++) {
                 int valor = i & MASCARA;
-                consome(valor, false);
+                try {
+                    consome(valor, false);
+                } catch (Exception exp) {
+                    System.out.println(exp.toString());
+                }
+
                 produzidos = cls(produzidos, valor);
             }
 
@@ -208,20 +217,33 @@ public class Shared {
             produzidos = cls(produzidos, lu & MASCARA);
 
             // Disponibiliza valores para reutilização
-            lf = lf + totalUsados;
+            lf = lf + producao;
         }
 
-        working.set(false);
+        assert --aqui == 0;
+
+        working.set(0);
     }
 
-    private int usadosConsecutivosNaFaixa(int first, int last) {
-        int totalUsados = 0;
-        int i = first;
-        while (i <= last && bitValue(produzidos, i & MASCARA) == 1) {
-            i++;
-            totalUsados++;
+    public void showBits(int produzidos) {
+        for (int i = 0; i < 32; i++) {
+            System.out.print(Shared.bitValue(produzidos, i));
+            if ((i+1) % 4 == 0) {
+                System.out.print(" ");
+            }
         }
 
-        return totalUsados;
+        System.out.println();
+    }
+
+    private int totalDaProducao(int first, int last) {
+        int produzidos = 0;
+        int i = first;
+        while (i <= last && produzido(i & MASCARA)) {
+            i++;
+            produzidos++;
+        }
+
+        return produzidos;
     }
 }

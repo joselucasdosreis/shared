@@ -141,17 +141,6 @@ public class SharedTest {
         assertEquals(31, shared.totalLiberados());
     }
 
-    private void showBits(int produzidos) {
-        for (int i = 0; i < 32; i++) {
-            System.out.print(Shared.bitValue(produzidos, i));
-            if ((i+1) % 4 == 0) {
-                System.out.print(" ");
-            }
-        }
-
-        System.out.println();
-    }
-
     @Test
     public void setUnsetBits() {
         int v = 0;
@@ -178,16 +167,10 @@ public class SharedTest {
         int size = 32; // 2^5
         int mask = size - 1;
 
-        int[] contadores = new int[size];
-
-        for(int i = 0; i < 3200; i++) {
+        for(int i = 0; i < 10_000_000; i++) {
             int indice = i & mask;
-            int corrente = contadores[indice];
-            contadores[indice] = corrente + 1;
-        }
-
-        for (int i = 0; i < size; i++) {
-            assertEquals(100, contadores[i]);
+            int modulo = i % 32;
+            assertEquals(modulo, indice);
         }
     }
 
@@ -202,32 +185,47 @@ public class SharedTest {
     public void comVariasThreads() throws Exception {
         SharedJustForTeste shared = new SharedJustForTeste();
 
-        Runnable decimo = () -> {
+        executaThreads(() -> {
             for (int i = 0; i < 3_600; i++) {
                 int k = shared.aloca();
+                assert shared.produzido(k) == false;
                 shared.produz(k);
             }
-        };
-
-        // CRIA
-        Thread[] threads = new Thread[10];
-
-        for (int i = 0; i < 10; i++) {
-            threads[i] = new Thread(decimo);
-        }
-
-        // INICIA
-        for (int i = 0; i < 10; i++) {
-            threads[i].start();
-        }
-
-        for (int i = 0; i < 10; i++) {
-            threads[i].join();
-        }
+        });
 
         shared.flush();
 
         assertEquals(36_000, shared.total());
+    }
+
+    @Test
+    public void verificaNaoReentranciaFlush() throws Exception {
+        SharedJustForTeste shared = new SharedJustForTeste();
+
+        executaThreads(() -> {
+            for (int i = 0; i < 100_000; i++) {
+                shared.flush();
+            }
+        });
+    }
+
+    private void executaThreads(Runnable tarefa) throws InterruptedException {
+        int TOTAL_THREADS = 10;
+
+        Thread[] threads = new Thread[TOTAL_THREADS];
+
+        for (int i = 0; i < TOTAL_THREADS; i++) {
+            threads[i] = new Thread(tarefa);
+        }
+
+        // INICIA
+        for (int i = 0; i < TOTAL_THREADS; i++) {
+            threads[i].start();
+        }
+
+        for (int i = 0; i < TOTAL_THREADS; i++) {
+            threads[i].join();
+        }
     }
 }
 
