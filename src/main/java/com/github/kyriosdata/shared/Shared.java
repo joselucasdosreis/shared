@@ -146,6 +146,16 @@ public class Shared {
     }
 
     /**
+     * Verifica se, no instante em questão, o valor está produzido.
+     * @param v O valor sobre o qual a verificação é feita.
+     * @return {@code true} se e somente se, no instante em que a
+     * chamada é realizada, o valor fornecido está produzido.
+     */
+    public boolean produzido(int v) {
+        return bitValue(produzidos, v) == 1;
+    }
+
+    /**
      * Realiza alocação de um valor.
      *
      * @return O identificador único, valor de 0 a 31, inclusive,

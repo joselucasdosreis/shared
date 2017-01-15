@@ -179,6 +179,8 @@ class Log implements ILog {
 
         // Disponibiliza o evento para consumo.
         shared.produz(v);
+
+        assert shared.produzido(v);
     }
 
     @Override

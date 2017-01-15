@@ -3,8 +3,28 @@ package com.github.kyriosdata.shared;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SharedTest {
+
+    @Test
+    public void alocaSequencialmenteZeroToTrintaUm() {
+        Shared s = new Shared();
+
+        int anterior = s.aloca();
+        s.produz(anterior);
+        for (int i = 0; i < 1_000; i++) {
+            int proximo = s.aloca();
+            s.produz(proximo);
+            assertTrue(proximo > -1 && proximo < 32);
+            if (anterior == 31) {
+                assertEquals(0, proximo);
+            } else {
+                assertEquals(anterior, proximo - 1);
+            }
+            anterior = proximo;
+        }
+    }
 
     @Test
     public void consumidorNaoReentrante() {
