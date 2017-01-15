@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * 7, por exemplo, indica que a informação associada ao valor
  * 7 está disponível para consumo.
  *
- * <p>O consumo propriamente dito ocorre pelo método {@link #consome(int)}.
+ * <p>O consumo propriamente dito ocorre pelo método {@link #consome(int, boolean)}.
  * O usuário dessa classe deve sobrescrever esse método. Quando chamado
  * sabe-se que a faixa de valores indicada foi produzida e deve ser
  * consumida.
@@ -65,8 +65,12 @@ public class Shared {
      * reutilização pelo método {@link #aloca()}.
      *
      * @param v Valor a ser consumido.
+     * @param ultimo {@code true} se e somente se
+     *                           é o "último" evento
+     *                           registrado até o momento
+     *                           para consumo.
      */
-    public void consome(int v) {}
+    public void consome(int v, boolean ultimo) {}
 
     /**
      * Indica a produção de informação associada
@@ -174,20 +178,26 @@ public class Shared {
         int fa = lf + 1;
         int la = ff.get() - 1 + SIZE;
 
-        // Percorre faixa de alocados pelo total de usados
+        // Obém o total de usados dentre os alocados
         int totalUsados = usadosConsecutivosNaFaixa(fa, la);
 
-        // Alocados e usados é |[fa, lu]| = totalUsados
-        int lu = fa + totalUsados - 1;
+        if (totalUsados > 0) {
+            // Alocados e usados é |[fa, lu]| = totalUsados
+            int lu = lf + totalUsados;
 
-        // Consome entrada
-        for (int i = fa; i <= lu; i++) {
-            consome(i & MASCARA);
-            cls(valoresUsados, i & MASCARA);
+            // Consome entradas (exceto o último)
+            for (int i = fa; i < lu; i++) {
+                consome(i & MASCARA, false);
+                cls(valoresUsados, i & MASCARA);
+            }
+
+            // Indica que se trata do ÚLTIMO
+            consome(lu & MASCARA, true);
+            cls(valoresUsados, lu & MASCARA);
+
+            // Disponibiliza valores para reutilização
+            lf = lf + totalUsados;
         }
-
-        // Disponibiliza valores para reutilização
-        lf = lf + totalUsados;
 
         working.set(false);
     }

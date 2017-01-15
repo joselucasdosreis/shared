@@ -159,8 +159,9 @@ public class SharedTest {
     }
 
     /**
-     * Executa 360.000 alocações, produções e "liberações".
-     * Ou seja, o esforço de 100 logs/s durante 1 hora.
+     * Executa 36.000 alocações, produções e "liberações".
+     * Ou seja, o esforço equivalente ao de 10 logs/s
+     * durante 1 hora.
      *
      * @throws Exception Possivelmente gerada.
      */
@@ -169,7 +170,7 @@ public class SharedTest {
         SharedJustForTeste shared = new SharedJustForTeste();
 
         Runnable decimo = () -> {
-            for (int i = 0; i < 36_000; i++) {
+            for (int i = 0; i < 3_600; i++) {
                 int k = shared.aloca();
                 shared.produz(k);
             }
@@ -193,7 +194,7 @@ public class SharedTest {
 
         shared.flush();
 
-        assertEquals(360_000, shared.total());
+        assertEquals(36_000, shared.total());
     }
 }
 
@@ -201,7 +202,7 @@ class SharedJustForTeste extends Shared {
     private int[] contador = new int[32];
 
     @Override
-    public void consome(int i) {
+    public void consome(int i, boolean ultimo) {
         contador[i] = contador[i] + 1;
     }
 

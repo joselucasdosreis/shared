@@ -9,9 +9,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 public class SharedBufferTest {
 
@@ -77,8 +75,24 @@ class Log implements ILog {
         }
 
         shared = new Shared() {
+
+            /**
+             * Consome o evento de log associado ao valor.
+             * Aparentemente é o "melhor lugar" para empacotar
+             * o evento em questão e depositá-lo no buffer.
+             *
+             * <p>Caso o buffer não comporte o registro completo
+             * do evento, então o espaço disponível é preenchido e
+             * o buffer persistido no arquivo em questão. Na
+             * sequência, a parte restante do evento é depositada
+             * no buffer.
+             *
+             * @param v Valor que identifica o log a ser consumido.
+             * @param ultimo Caso verdadeiro, então persiste o conteúdo
+             *               disponível no buffer.
+             */
             @Override
-            public void consome(int v) {
+            public void consome(int v, boolean ultimo) {
                 byte[] bytes = packLogEvent(eventos[v]);
                 System.out.println(new String(bytes, StandardCharsets.UTF_8));
             }
@@ -100,6 +114,13 @@ class Log implements ILog {
         log(ERROR, msg);
     }
 
+    /**
+     * Produz evento de log carimbado com o instante de tempo
+     * corrente (UTC).
+     *
+     * @param level Nível do log: INFO, WARN ou ERROR.
+     * @param msg Mensagem associada ao evento.
+     */
     private void log(int level, String msg) {
         ZonedDateTime nowUTC = ZonedDateTime.now(ZoneOffset.UTC);
 
@@ -111,6 +132,7 @@ class Log implements ILog {
         eventos[v].level = (byte) level;
         eventos[v].payload = msg;
 
+        // Disponibiliza o evento para consumo.
         shared.produz(v);
     }
 
@@ -156,9 +178,14 @@ class TaskManager {
     private ScheduledThreadPoolExecutor agenda;
     private List<ScheduledFuture> agendados;
 
+    // Threads de uso geral
+    private ExecutorService taskExecutor;
+
     public TaskManager() {
         agenda = new ScheduledThreadPoolExecutor(2);
         agendados = new ArrayList<>();
+
+        taskExecutor = Executors.newFixedThreadPool(2);
     }
 
     public void novoAgendamento(Runnable r) {
