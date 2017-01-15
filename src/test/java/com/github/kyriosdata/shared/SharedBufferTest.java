@@ -2,14 +2,20 @@ package com.github.kyriosdata.shared;
 
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.SeekableByteChannel;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.*;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.*;
+
+import static java.nio.file.StandardOpenOption.APPEND;
+import static java.nio.file.StandardOpenOption.CREATE;
 
 public class SharedBufferTest {
 
@@ -37,13 +43,45 @@ public class SharedBufferTest {
         TaskManager tm = new TaskManager();
         tm.novoAgendamento(log);
 
-        log.info("ok");
-        log.warn("alerta");
-        log.error("erro");
+        gerarLogsParaTeste(log);
+    }
+
+    private void gerarLogsParaTeste(ILog log) {
+        Runnable decimo = () -> {
+            for (int i = 0; i < 100; i++) {
+                String msg = "I: " + i + " ThreadName: " + Thread.currentThread().getName();
+                System.out.println(msg);
+                log.error(msg);
+            }
+        };
+
+        // CRIA
+        int TOTAL_THREADS = 2;
+
+        Thread[] threads = new Thread[TOTAL_THREADS];
+
+        for (int i = 0; i < TOTAL_THREADS; i++) {
+            threads[i] = new Thread(decimo);
+        }
+
+        System.out.println("Threads criadas.");
+
+        // INICIA
+        for (int i = 0; i < TOTAL_THREADS; i++) {
+            threads[i].start();
+        }
+
+        System.out.println("Threads iniciadas.");
 
         try {
-            Thread.sleep(2000);
-        } catch (Exception exp) {}
+            for (int i = 0; i < TOTAL_THREADS; i++) {
+                threads[i].join();
+            }
+        } catch (Exception exp) {
+            System.out.println(exp.toString());
+        }
+
+        System.out.println("Threads concluídas.");
     }
 }
 
@@ -52,7 +90,9 @@ public class SharedBufferTest {
  */
 interface ILog extends Runnable {
     void info(String msg);
+
     void warn(String msg);
+
     void error(String msg);
 }
 
@@ -63,7 +103,7 @@ class Log implements ILog {
     private final int WARN = 1;
     private final int ERROR = 2;
 
-    private String[] levelNames = { "INFO", "WARN", "ERROR" };
+    private String[] levelNames = {"INFO", "WARN", "ERROR"};
 
     private LogEvent[] eventos = new LogEvent[SIZE];
 
@@ -93,8 +133,13 @@ class Log implements ILog {
              */
             @Override
             public void consome(int v, boolean ultimo) {
+                FileManager fm = new FileManager();
                 byte[] bytes = packLogEvent(eventos[v]);
-                System.out.println(new String(bytes, StandardCharsets.UTF_8));
+                try {
+                    fm.acrescenta(bytes, 0, bytes.length);
+                } catch (Exception exp) {
+                    System.out.println(exp.toString());
+                }
             }
         };
     }
@@ -119,7 +164,7 @@ class Log implements ILog {
      * corrente (UTC).
      *
      * @param level Nível do log: INFO, WARN ou ERROR.
-     * @param msg Mensagem associada ao evento.
+     * @param msg   Mensagem associada ao evento.
      */
     private void log(int level, String msg) {
         ZonedDateTime nowUTC = ZonedDateTime.now(ZoneOffset.UTC);
@@ -145,14 +190,13 @@ class Log implements ILog {
      * Empacota um evento de log em uma sequência de bytes.
      *
      * @param event Evento a ser convertido em sequência de bytes.
-     *
      * @return Sequência de bytes correspondente ao evento.
      */
     private byte[] packLogEvent(LogEvent event) {
         String now = event.instante.format(DateTimeFormatter.ISO_ZONED_DATE_TIME);
         String level = levelNames[event.level];
 
-        String log = String.format("%s %s %s", now, level, event.payload);
+        String log = String.format("%s %s %s\n", now, level, event.payload);
 
         return log.getBytes(StandardCharsets.UTF_8);
     }
@@ -166,6 +210,7 @@ class Log implements ILog {
         public String payload;
     }
 }
+
 /**
  * Gerencia a execução de tarefas. Entre os serviços está o
  * agendamento de execução em intervalos de tempo específico
@@ -195,4 +240,28 @@ class TaskManager {
 
 class FileManager {
 
+    public void acrescenta(byte[] payload, int i, int size) throws Exception {
+        Path path = Paths.get("/Users/Kyriosdata/tmp", "localhost.log");
+        ByteBuffer buffer = ByteBuffer.wrap(payload, i, size);
+
+        Set<OpenOption> options = new HashSet<>();
+        options.add(APPEND);
+        options.add(CREATE);
+
+        try (SeekableByteChannel seekableByteChannel = (Files.newByteChannel(path,
+                options))) {
+
+            //append some text at the end
+            seekableByteChannel.position(seekableByteChannel.size());
+
+            while (buffer.hasRemaining()) {
+                seekableByteChannel.write(buffer);
+            }
+
+            buffer.clear();
+
+        } catch (IOException ex) {
+            System.err.println(ex);
+        }
+    }
 }

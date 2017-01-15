@@ -54,7 +54,7 @@ public class Shared {
     private int lf = SIZE - 1;
 
     // 32 bits (1 para cada valor da lista circular)
-    private int valoresUsados = 0;
+    private int produzidos = 0;
 
     /**
      * Consome a informação produzida e associada
@@ -84,7 +84,8 @@ public class Shared {
      * @see #flush()
      */
     public void produz(int v) {
-        valoresUsados = set(valoresUsados, v);
+        assert v > -1 && v < 32;
+        produzidos = set(produzidos, v);
     }
 
     /**
@@ -187,13 +188,14 @@ public class Shared {
 
             // Consome entradas (exceto o último)
             for (int i = fa; i < lu; i++) {
-                consome(i & MASCARA, false);
-                cls(valoresUsados, i & MASCARA);
+                int valor = i & MASCARA;
+                consome(valor, false);
+                cls(produzidos, valor);
             }
 
             // Indica que se trata do ÚLTIMO
             consome(lu & MASCARA, true);
-            cls(valoresUsados, lu & MASCARA);
+            cls(produzidos, lu & MASCARA);
 
             // Disponibiliza valores para reutilização
             lf = lf + totalUsados;
@@ -205,7 +207,7 @@ public class Shared {
     private int usadosConsecutivosNaFaixa(int first, int last) {
         int totalUsados = 0;
         int i = first;
-        while (i <= last && bitValue(valoresUsados, i & MASCARA) == 1) {
+        while (i <= last && bitValue(produzidos, i & MASCARA) == 1) {
             i++;
             totalUsados++;
         }
