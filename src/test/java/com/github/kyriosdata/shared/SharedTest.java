@@ -142,27 +142,6 @@ public class SharedTest {
     }
 
     @Test
-    public void setUnsetBits() {
-        int v = 0;
-
-        // Um inteiro qualquer
-        int random = (int)(Math.random() * Integer.MAX_VALUE);
-
-        for (int i = 0; i < 32; i++) {
-            int bit = Shared.bitValue(random, i);
-
-            int afterSet = Shared.set(random, i);
-            assertEquals(1, Shared.bitValue(afterSet, i), "Valor: " + random + " i: " + i);
-
-            int afterCls = Shared.cls(random, i);
-            assertEquals(0, Shared.bitValue(afterCls, i), "Valor: " + random + " i: " + i);
-
-            int calculado = bit == 0 ? afterCls : afterSet;
-            assertEquals(random, calculado, "Valor: " + random + " i: " + i);
-        }
-    }
-
-    @Test
     public void circularidadeSemModulo() {
         int size = 32; // 2^5
         int mask = size - 1;
@@ -188,14 +167,13 @@ public class SharedTest {
         executaThreads(() -> {
             for (int i = 0; i < 3_600; i++) {
                 int k = shared.aloca();
-                assert shared.produzido(k) == false;
                 shared.produz(k);
             }
         });
 
         shared.flush();
 
-        assertEquals(36000, shared.total());
+        assertEquals(72_000, shared.total());
     }
 
     @Test
@@ -210,7 +188,7 @@ public class SharedTest {
     }
 
     private void executaThreads(Runnable tarefa) throws InterruptedException {
-        int TOTAL_THREADS = 10;
+        int TOTAL_THREADS = 20;
 
         Thread[] threads = new Thread[TOTAL_THREADS];
 

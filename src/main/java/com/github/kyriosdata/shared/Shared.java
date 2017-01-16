@@ -52,9 +52,6 @@ public class Shared {
     // Indica última entrada livre (las free)
     private int lf = SIZE - 1;
 
-    // 32 bits (1 para cada valor da lista circular)
-    private int produzidos = 0;
-
     // Cada byte indica, para o índice (valor) em questão,
     // se há produto disponível (1) ou não (0).
     private byte[] producao = new byte[SIZE];
@@ -87,44 +84,7 @@ public class Shared {
      * @see #flush()
      */
     public void produz(int v) {
-        assert v > -1 && v < 32;
-        produzidos = set(produzidos, v);
         producao[v] = 1;
-    }
-
-    /**
-     * Obtém o valor do n-ésimo bit do inteiro.
-     *
-     * @param x O inteiro.
-     * @param n O n-ésimo (zero-based) bit.
-     * @return O valor do n-ésimo bit do inteiro.
-     */
-    public static int bitValue(int x, int n) {
-        return (x & (1 << n)) >>> n;
-    }
-
-    /**
-     * Define com o valor zero o n-ésimo (zero-based) bit do inteiro.
-     *
-     * @param x O inteiro.
-     * @param n O n-ésimo bit (zero-based).
-     * @return O inteiro com o n-ésimo (zero-based) bit 0. Possivelmente
-     * o valor retornado é o mesmo daquele fornecido, se o bit já era 0.
-     */
-    public static int cls(int x, int n) {
-        return x & ~(1 << n);
-    }
-
-    /**
-     * Define com o valor 1 o n-ésimo (zero-based) bit do inteiro.
-     *
-     * @param x O inteiro.
-     * @param n O n-ésimo bit (zero-based).
-     * @return O inteiro com o n-ésimo bit definido com o valor
-     * 1 (possivelmente o mesmo valor fornecido).
-     */
-    public static int set(int x, int n) {
-        return x | (1 << n);
     }
 
     /**
@@ -157,11 +117,6 @@ public class Shared {
      */
     public boolean produzido(int v) {
         return producao[v] == 1;
-        //return bitValue(produzidos, v) == 1;
-    }
-
-    public Shared() {
-        showBits(produzidos);
     }
 
     /**
@@ -175,7 +130,6 @@ public class Shared {
             int candidato = ff.get();
             if (candidato <= lf) {
                 if (ff.compareAndSet(candidato, candidato + 1)) {
-                    produzidos = cls(produzidos, candidato & MASCARA);
                     producao[candidato & MASCARA] = 0;
                     return candidato & MASCARA;
                 }
@@ -184,8 +138,6 @@ public class Shared {
             }
         }
     }
-
-    private static int aqui = 0;
 
     /**
      * Processa valores já disponíveis. Ou seja,
@@ -198,8 +150,6 @@ public class Shared {
         if (!working.compareAndSet(0, 1)) {
             return;
         }
-
-        assert ++aqui < 2;
 
         int fa = lf + 1;
         int la = ff.get() - 1 + SIZE;
@@ -220,33 +170,18 @@ public class Shared {
                     System.out.println(exp.toString());
                 }
 
-                produzidos = cls(produzidos, valor);
                 producao[valor] = 0;
             }
 
             // Indica que se trata do ÚLTIMO
             consome(lu & MASCARA, true);
-            produzidos = cls(produzidos, lu & MASCARA);
             producao[lu & MASCARA] = 0;
 
             // Disponibiliza valores para reutilização
             lf = lf + totalProducao;
         }
 
-        assert --aqui == 0;
-
         working.set(0);
-    }
-
-    public void showBits(int produzidos) {
-        for (int i = 0; i < 32; i++) {
-            System.out.print(Shared.bitValue(produzidos, i));
-            if ((i+1) % 4 == 0) {
-                System.out.print(" ");
-            }
-        }
-
-        System.out.println();
     }
 
     private int totalDaProducao(int first, int last) {
