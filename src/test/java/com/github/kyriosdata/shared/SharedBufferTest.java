@@ -51,8 +51,7 @@ public class SharedBufferTest {
     private void gerarLogsParaTeste(ILog log) {
         Runnable decimo = () -> {
             for (int i = 0; i < 3_600; i++) {
-                String msg = "I: " + i + " ThreadName: " + Thread.currentThread().getName();
-                log.error(msg);
+                log.error("I: " + i + " ThreadName: " + Thread.currentThread().getName());
             }
         };
 
@@ -162,14 +161,15 @@ class Log implements ILog {
              */
             @Override
             public void consome(int v, boolean ultimo) {
-                FileManager fm = new FileManager();
                 byte[] bytes = packLogEvent(eventos[v]);
 
-                try {
-                    fm.acrescenta(bytes, 0, bytes.length);
-                } catch (Exception exp) {
-                    System.out.println(exp.toString());
-                }
+                ByteBufferTest.transferToBuffer(buffer, bytes, ultimo);
+//                FileManager fm = new FileManager();
+//                try {
+//                    fm.acrescenta(bytes, 0, bytes.length);
+//                } catch (Exception exp) {
+//                    System.out.println(exp.toString());
+//                }
             }
         };
     }
@@ -276,6 +276,10 @@ class FileManager {
         Path path = Paths.get("/Users/Kyriosdata/tmp", "localhost.log");
         ByteBuffer buffer = ByteBuffer.wrap(payload, i, size);
 
+        acrescenta(path, buffer);
+    }
+
+    public void acrescenta(Path path, ByteBuffer buffer) {
         Set<OpenOption> options = new HashSet<>();
         options.add(APPEND);
         options.add(CREATE);

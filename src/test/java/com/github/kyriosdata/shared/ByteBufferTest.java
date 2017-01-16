@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -77,7 +79,7 @@ public class ByteBufferTest {
      * @param flush Indica que flush do buffer deve ser realizado, mesmo
      *              que não esteja cheio.
      */
-    public void transferToBuffer(ByteBuffer buffer, byte[] bytes, boolean flush) {
+    public static void transferToBuffer(ByteBuffer buffer, byte[] bytes, boolean flush) {
         int resto = copyToBuffer(buffer, bytes, 0);
         while (resto != 0) {
 
@@ -97,13 +99,17 @@ public class ByteBufferTest {
      *
      * @param buffer Buffer cujo conteúdo deve ser descarregado.
      */
-    public void flush(ByteBuffer buffer) {
+    public static void flush(ByteBuffer buffer) {
         buffer.flip();
 
-        byte[] recuperados = new byte[1024];
-        buffer.get(recuperados, 0 , buffer.limit());
-        assertEquals(0, buffer.remaining());
-        System.out.println(new String(recuperados, 0, buffer.position(), StandardCharsets.UTF_8));
+//        byte[] recuperados = new byte[1024];
+//        buffer.get(recuperados, 0 , buffer.limit());
+//        assertEquals(0, buffer.remaining());
+//        System.out.println(new String(recuperados, 0, buffer.position(), StandardCharsets.UTF_8));
+
+        FileManager fm = new FileManager();
+        Path path = Paths.get("/Users/kyriosdata/tmp/localhost.log");
+        fm.acrescenta(path, buffer);
 
         buffer.clear();
     }
@@ -122,7 +128,7 @@ public class ByteBufferTest {
      * Um valor diferente de zero indica que a capacidade do buffer
      * foi atingida.
      */
-    public int copyToBuffer(ByteBuffer bb, byte[] payload, int offset) {
+    public static int copyToBuffer(ByteBuffer bb, byte[] payload, int offset) {
 
         int restante = bb.remaining();
         int pretendido = payload.length - offset;
