@@ -37,7 +37,7 @@ public class Shared {
 
     // Tamanho da "lista circular" (ring buffer).
     // Necessariamente uma potência de 2.
-    private final int SIZE = 32;
+    private final int SIZE = 128;
 
     // Máscara para "rotacionar" índices
     // Permite substituir "% SIZE" por "& MASCARA" (mais eficiente).

@@ -1,17 +1,25 @@
 package com.github.kyriosdata.shared;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.OpenOption;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.*;
 
 import static java.nio.file.StandardOpenOption.APPEND;
@@ -46,6 +54,50 @@ public class SharedBufferTest {
         gerarLogsParaTeste(log);
 
         log.run();
+
+        System.out.println(ByteBufferTest.contadorFlush);
+    }
+
+    @Test
+    public void usandoLog4jApenasComparacao() {
+        Logger logger = LogManager.getLogger(this.getClass());
+        gerarLogsParaLog4j(logger);
+    }
+
+    private void gerarLogsParaLog4j(Logger log) {
+        Runnable tarefa = () -> {
+            for (int i = 0; i < 3_600; i++) {
+                log.info("I: " + i + " ThreadName: " + Thread.currentThread().getName());
+            }
+        };
+
+        // CRIA
+        int TOTAL_THREADS = 20;
+
+        Thread[] threads = new Thread[TOTAL_THREADS];
+
+        for (int i = 0; i < TOTAL_THREADS; i++) {
+            threads[i] = new Thread(tarefa);
+        }
+
+        System.out.println("Threads criadas.");
+
+        // INICIA
+        for (int i = 0; i < TOTAL_THREADS; i++) {
+            threads[i].start();
+        }
+
+        System.out.println("Threads iniciadas.");
+
+        try {
+            for (int i = 0; i < TOTAL_THREADS; i++) {
+                threads[i].join();
+            }
+        } catch (Exception exp) {
+            System.out.println(exp.toString());
+        }
+
+        System.out.println("Threads concluídas.");
     }
 
     private void gerarLogsParaTeste(ILog log) {
@@ -117,8 +169,8 @@ interface ILog extends Runnable {
 
 class Log implements ILog {
 
-    private final int BUFFER_SIZE = 4096;
-    private final int SIZE = 32;
+    private final int BUFFER_SIZE = 8192;
+    private final int EVENTS_SIZE = 128;
     private final int INFO = 0;
     private final int WARN = 1;
     private final int ERROR = 2;
@@ -126,7 +178,7 @@ class Log implements ILog {
     private String[] levelNames = {"INFO", "WARN", "ERROR"};
 
     // Cache Level 1
-    private LogEvent[] eventos = new LogEvent[SIZE];
+    private LogEvent[] eventos = new LogEvent[EVENTS_SIZE];
 
     // Cache Level 2
     private ByteBuffer buffer = ByteBuffer.allocateDirect(BUFFER_SIZE);
@@ -134,7 +186,7 @@ class Log implements ILog {
     private Shared shared;
 
     public Log() {
-        for (int i = 0; i < SIZE; i++) {
+        for (int i = 0; i < EVENTS_SIZE; i++) {
             eventos[i] = new LogEvent();
         }
 
@@ -164,12 +216,6 @@ class Log implements ILog {
                 byte[] bytes = packLogEvent(eventos[v]);
 
                 ByteBufferTest.transferToBuffer(buffer, bytes, ultimo);
-//                FileManager fm = new FileManager();
-//                try {
-//                    fm.acrescenta(bytes, 0, bytes.length);
-//                } catch (Exception exp) {
-//                    System.out.println(exp.toString());
-//                }
             }
         };
     }

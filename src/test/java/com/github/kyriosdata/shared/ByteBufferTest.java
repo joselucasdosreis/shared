@@ -94,12 +94,15 @@ public class ByteBufferTest {
         }
     }
 
+    public static int contadorFlush = 0;
+
     /**
      * Descarrega o conteúdo do buffer.
      *
      * @param buffer Buffer cujo conteúdo deve ser descarregado.
      */
     public static void flush(ByteBuffer buffer) {
+        contadorFlush++;
         buffer.flip();
 
 //        byte[] recuperados = new byte[1024];
