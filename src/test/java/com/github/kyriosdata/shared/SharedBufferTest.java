@@ -44,19 +44,20 @@ public class SharedBufferTest {
         tm.novoAgendamento(log);
 
         gerarLogsParaTeste(log);
+
+        log.run();
     }
 
     private void gerarLogsParaTeste(ILog log) {
         Runnable decimo = () -> {
-            for (int i = 0; i < 100; i++) {
+            for (int i = 0; i < 3_600; i++) {
                 String msg = "I: " + i + " ThreadName: " + Thread.currentThread().getName();
-                System.out.println(msg);
                 log.error(msg);
             }
         };
 
         // CRIA
-        int TOTAL_THREADS = 2;
+        int TOTAL_THREADS = 20;
 
         Thread[] threads = new Thread[TOTAL_THREADS];
 
@@ -89,10 +90,29 @@ public class SharedBufferTest {
  * Definição dos serviços de <i>logging</i>.
  */
 interface ILog extends Runnable {
+    /**
+     * Registra mensagem de log (informativa).
+     *
+     * @param msg Mensagem a ser registrada.
+     */
     void info(String msg);
 
+    /**
+     * Registra mensagem de log (aviso). Um aviso
+     * é entendido como uma situação excepcional,
+     * embora não configure necessariamente algo
+     * indesejável.
+     *
+     * @param msg Mensagem a ser registrada.
+     */
     void warn(String msg);
 
+    /**
+     * Registra mensagem de log (erro). Representa
+     * situação indesejável.
+     *
+     * @param msg Mensagem a ser registrada.
+     */
     void error(String msg);
 }
 
@@ -125,7 +145,11 @@ class Log implements ILog {
              * do evento, então o espaço disponível é preenchido e
              * o buffer persistido no arquivo em questão. Na
              * sequência, a parte restante do evento é depositada
-             * no buffer.
+             * no buffer já liberado.
+             *
+             * <p>Adicionalmente às observações acima, o "flush" em
+             * disco é evitado enquanto há espaço no buffer e ocorre
+             * quando o elemento consumido é o último (flag true).
              *
              * @param v Valor que identifica o log a ser consumido.
              * @param ultimo Caso verdadeiro, então persiste o conteúdo
