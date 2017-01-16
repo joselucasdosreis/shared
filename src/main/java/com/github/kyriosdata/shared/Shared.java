@@ -90,7 +90,6 @@ public class Shared {
         assert v > -1 && v < 32;
         produzidos = set(produzidos, v);
         producao[v] = 1;
-        assert produzido(v) == true;
     }
 
     /**
