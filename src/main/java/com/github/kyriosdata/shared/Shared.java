@@ -55,6 +55,10 @@ public class Shared {
     // 32 bits (1 para cada valor da lista circular)
     private int produzidos = 0;
 
+    // Cada byte indica, para o índice (valor) em questão,
+    // se há produto disponível (1) ou não (0).
+    private byte[] producao = new byte[SIZE];
+
     /**
      * Consome a informação produzida e associada
      * ao valor indicado.
@@ -85,6 +89,7 @@ public class Shared {
     public void produz(int v) {
         assert v > -1 && v < 32;
         produzidos = set(produzidos, v);
+        producao[v] = 1;
         assert produzido(v) == true;
     }
 
@@ -152,7 +157,8 @@ public class Shared {
      * chamada é realizada, o valor fornecido está produzido.
      */
     public boolean produzido(int v) {
-        return bitValue(produzidos, v) == 1;
+        return producao[v] == 1;
+        //return bitValue(produzidos, v) == 1;
     }
 
     public Shared() {
@@ -171,6 +177,7 @@ public class Shared {
             if (candidato <= lf) {
                 if (ff.compareAndSet(candidato, candidato + 1)) {
                     produzidos = cls(produzidos, candidato & MASCARA);
+                    producao[candidato & MASCARA] = 0;
                     return candidato & MASCARA;
                 }
             } else {
@@ -199,11 +206,11 @@ public class Shared {
         int la = ff.get() - 1 + SIZE;
 
         // Obém o total de alocados já produzidos
-        int producao = totalDaProducao(fa, la);
+        int totalProducao = totalDaProducao(fa, la);
 
-        if (producao > 0) {
+        if (totalProducao > 0) {
             // Alocados e usados é |[fa, lu]| = producao
-            int lu = lf + producao;
+            int lu = lf + totalProducao;
 
             // Consome entradas (exceto o último)
             for (int i = fa; i < lu; i++) {
@@ -215,14 +222,16 @@ public class Shared {
                 }
 
                 produzidos = cls(produzidos, valor);
+                producao[valor] = 0;
             }
 
             // Indica que se trata do ÚLTIMO
             consome(lu & MASCARA, true);
             produzidos = cls(produzidos, lu & MASCARA);
+            producao[lu & MASCARA] = 0;
 
             // Disponibiliza valores para reutilização
-            lf = lf + producao;
+            lf = lf + totalProducao;
         }
 
         assert --aqui == 0;
