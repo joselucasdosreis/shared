@@ -155,6 +155,10 @@ public class Shared {
         return bitValue(produzidos, v) == 1;
     }
 
+    public Shared() {
+        showBits(produzidos);
+    }
+
     /**
      * Realiza alocação de um valor.
      *
@@ -166,6 +170,7 @@ public class Shared {
             int candidato = ff.get();
             if (candidato <= lf) {
                 if (ff.compareAndSet(candidato, candidato + 1)) {
+                    produzidos = cls(produzidos, candidato & MASCARA);
                     return candidato & MASCARA;
                 }
             } else {
@@ -193,7 +198,7 @@ public class Shared {
         int fa = lf + 1;
         int la = ff.get() - 1 + SIZE;
 
-        // Obém o total de usados dentre os alocados
+        // Obém o total de alocados já produzidos
         int producao = totalDaProducao(fa, la);
 
         if (producao > 0) {
@@ -237,13 +242,13 @@ public class Shared {
     }
 
     private int totalDaProducao(int first, int last) {
-        int produzidos = 0;
+        int producao = 0;
         int i = first;
         while (i <= last && produzido(i & MASCARA)) {
             i++;
-            produzidos++;
+            producao++;
         }
 
-        return produzidos;
+        return producao;
     }
 }

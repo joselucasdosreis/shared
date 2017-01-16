@@ -195,7 +195,7 @@ public class SharedTest {
 
         shared.flush();
 
-        assertEquals(36_000, shared.total());
+        assertEquals(7200, shared.total());
     }
 
     @Test
@@ -210,7 +210,7 @@ public class SharedTest {
     }
 
     private void executaThreads(Runnable tarefa) throws InterruptedException {
-        int TOTAL_THREADS = 10;
+        int TOTAL_THREADS = 2;
 
         Thread[] threads = new Thread[TOTAL_THREADS];
 
