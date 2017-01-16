@@ -118,6 +118,7 @@ interface ILog extends Runnable {
 
 class Log implements ILog {
 
+    private final int BUFFER_SIZE = 4096;
     private final int SIZE = 32;
     private final int INFO = 0;
     private final int WARN = 1;
@@ -125,7 +126,11 @@ class Log implements ILog {
 
     private String[] levelNames = {"INFO", "WARN", "ERROR"};
 
+    // Cache Level 1
     private LogEvent[] eventos = new LogEvent[SIZE];
+
+    // Cache Level 2
+    private ByteBuffer buffer = ByteBuffer.allocateDirect(BUFFER_SIZE);
 
     private Shared shared;
 
@@ -159,6 +164,7 @@ class Log implements ILog {
             public void consome(int v, boolean ultimo) {
                 FileManager fm = new FileManager();
                 byte[] bytes = packLogEvent(eventos[v]);
+
                 try {
                     fm.acrescenta(bytes, 0, bytes.length);
                 } catch (Exception exp) {
