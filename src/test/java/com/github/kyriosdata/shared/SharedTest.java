@@ -208,7 +208,7 @@ public class SharedTest {
 }
 
 class SharedJustForTeste extends Shared {
-    private int[] contador = new int[32];
+    private int[] contador = new int[1024];
 
     @Override
     public void consome(int i, boolean ultimo) {
@@ -216,14 +216,14 @@ class SharedJustForTeste extends Shared {
     }
 
     public void output() {
-        for(int i = 0; i < 32; i++) {
+        for(int i = 0; i < 1024; i++) {
             System.out.println(i + ": " + contador[i]);
         }
     }
 
     public int total() {
         int total = 0;
-        for (int i = 0; i < 32; i++) {
+        for (int i = 0; i < 1024; i++) {
             total = total + contador[i];
         }
 

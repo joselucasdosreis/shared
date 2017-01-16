@@ -95,6 +95,9 @@ public class ByteBufferTest {
     }
 
     public static int contadorFlush = 0;
+    private static FileManager fm = new FileManager();
+    private static Path path = Paths.get("/Users/kyriosdata/tmp/localhost.log");
+
 
     /**
      * Descarrega o conteúdo do buffer.
@@ -105,13 +108,6 @@ public class ByteBufferTest {
         contadorFlush++;
         buffer.flip();
 
-//        byte[] recuperados = new byte[1024];
-//        buffer.get(recuperados, 0 , buffer.limit());
-//        assertEquals(0, buffer.remaining());
-//        System.out.println(new String(recuperados, 0, buffer.position(), StandardCharsets.UTF_8));
-
-        FileManager fm = new FileManager();
-        Path path = Paths.get("/Users/kyriosdata/tmp/localhost.log");
         fm.acrescenta(path, buffer);
 
         buffer.clear();

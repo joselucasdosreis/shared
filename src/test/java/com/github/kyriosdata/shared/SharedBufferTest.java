@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -43,7 +44,7 @@ public class SharedBufferTest {
     }
 
     @Test
-    public void logFuncionamento() {
+    public void log4h() {
         ILog log = new Log();
 
         // Gerenciador de tarefas
@@ -51,7 +52,11 @@ public class SharedBufferTest {
         TaskManager tm = new TaskManager();
         tm.novoAgendamento(log);
 
-        gerarLogsParaTeste(log);
+        geraLogsEmVariasThreads(() -> {
+            for (int i = 0; i < 3_600; i++) {
+                log.error("I: " + i + " ThreadName: " + Thread.currentThread().getName());
+            }
+        });
 
         log.run();
 
@@ -59,17 +64,16 @@ public class SharedBufferTest {
     }
 
     @Test
-    public void usandoLog4jApenasComparacao() {
+    public void log4j() {
         Logger logger = LogManager.getLogger(this.getClass());
-        gerarLogsParaLog4j(logger);
+        geraLogsEmVariasThreads(() -> {
+            for (int i = 0; i < 3_600; i++) {
+                logger.info("I: " + i + " ThreadName: " + Thread.currentThread().getName());
+            }
+        });
     }
 
-    private void gerarLogsParaLog4j(Logger log) {
-        Runnable tarefa = () -> {
-            for (int i = 0; i < 3_600; i++) {
-                log.info("I: " + i + " ThreadName: " + Thread.currentThread().getName());
-            }
-        };
+    private void geraLogsEmVariasThreads(Runnable tarefa) {
 
         // CRIA
         int TOTAL_THREADS = 20;
@@ -78,42 +82,6 @@ public class SharedBufferTest {
 
         for (int i = 0; i < TOTAL_THREADS; i++) {
             threads[i] = new Thread(tarefa);
-        }
-
-        System.out.println("Threads criadas.");
-
-        // INICIA
-        for (int i = 0; i < TOTAL_THREADS; i++) {
-            threads[i].start();
-        }
-
-        System.out.println("Threads iniciadas.");
-
-        try {
-            for (int i = 0; i < TOTAL_THREADS; i++) {
-                threads[i].join();
-            }
-        } catch (Exception exp) {
-            System.out.println(exp.toString());
-        }
-
-        System.out.println("Threads concluídas.");
-    }
-
-    private void gerarLogsParaTeste(ILog log) {
-        Runnable decimo = () -> {
-            for (int i = 0; i < 3_600; i++) {
-                log.error("I: " + i + " ThreadName: " + Thread.currentThread().getName());
-            }
-        };
-
-        // CRIA
-        int TOTAL_THREADS = 20;
-
-        Thread[] threads = new Thread[TOTAL_THREADS];
-
-        for (int i = 0; i < TOTAL_THREADS; i++) {
-            threads[i] = new Thread(decimo);
         }
 
         System.out.println("Threads criadas.");
@@ -169,8 +137,8 @@ interface ILog extends Runnable {
 
 class Log implements ILog {
 
-    private final int BUFFER_SIZE = 8192;
-    private final int EVENTS_SIZE = 128;
+    private final int BUFFER_SIZE = 64 * 1024;
+    private final int EVENTS_SIZE = 1024;
     private final int INFO = 0;
     private final int WARN = 1;
     private final int ERROR = 2;
@@ -181,7 +149,7 @@ class Log implements ILog {
     private LogEvent[] eventos = new LogEvent[EVENTS_SIZE];
 
     // Cache Level 2
-    private ByteBuffer buffer = ByteBuffer.allocateDirect(BUFFER_SIZE);
+    private ByteBuffer buffer = ByteBuffer.allocate(BUFFER_SIZE);
 
     private Shared shared;
 
@@ -215,7 +183,7 @@ class Log implements ILog {
             public void consome(int v, boolean ultimo) {
                 byte[] bytes = packLogEvent(eventos[v]);
 
-                ByteBufferTest.transferToBuffer(buffer, bytes, ultimo);
+                // ByteBufferTest.transferToBuffer(buffer, bytes, ultimo);
             }
         };
     }
@@ -243,20 +211,16 @@ class Log implements ILog {
      * @param msg   Mensagem associada ao evento.
      */
     private void log(int level, String msg) {
-        ZonedDateTime nowUTC = ZonedDateTime.now(ZoneOffset.UTC);
-
         // Reserva logevent
         int v = shared.aloca();
 
         // Produz o evento
-        eventos[v].instante = nowUTC;
+        eventos[v].instante = System.currentTimeMillis();
         eventos[v].level = (byte) level;
         eventos[v].payload = msg;
 
         // Disponibiliza o evento para consumo.
         shared.produz(v);
-
-        assert shared.produzido(v);
     }
 
     @Override
@@ -271,7 +235,7 @@ class Log implements ILog {
      * @return Sequência de bytes correspondente ao evento.
      */
     private byte[] packLogEvent(LogEvent event) {
-        String now = event.instante.format(DateTimeFormatter.ISO_ZONED_DATE_TIME);
+        ZonedDateTime now = Instant.ofEpochMilli(event.instante).atZone(ZoneOffset.UTC);
         String level = levelNames[event.level];
 
         String log = String.format("%s %s %s\n", now, level, event.payload);
@@ -283,7 +247,7 @@ class Log implements ILog {
      * Contêiner para um registro de log.
      */
     private class LogEvent {
-        public ZonedDateTime instante;
+        public long instante;
         public byte level;
         public String payload;
     }
@@ -339,8 +303,6 @@ class FileManager {
             while (buffer.hasRemaining()) {
                 seekableByteChannel.write(buffer);
             }
-
-            buffer.clear();
 
         } catch (IOException ex) {
             System.err.println(ex);
