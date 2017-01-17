@@ -207,3 +207,20 @@ public class SharedTest {
     }
 }
 
+class SharedJustForTeste extends Shared {
+    private int[] contador = new int[1024];
+
+    @Override
+    public void consome(int i, boolean ultimo) {
+        contador[i] = contador[i] + 1;
+    }
+
+    public int total() {
+        int total = 0;
+        for (int i = 0; i < 1024; i++) {
+            total = total + contador[i];
+        }
+
+        return total;
+    }
+}

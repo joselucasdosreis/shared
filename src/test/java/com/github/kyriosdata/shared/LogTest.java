@@ -4,17 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDateTime;
-
-public class SharedBufferTest {
-
-    @Test
-    public void processo() throws Exception {
-        TaskManager pm = new TaskManager();
-        pm.novoAgendamento(() -> System.out.println(LocalDateTime.now()));
-
-        Thread.sleep(1000);
-    }
+public class LogTest {
 
     @Test
     public void singleLog() {
@@ -26,8 +16,6 @@ public class SharedBufferTest {
         log.fail("ThreadName: " + Thread.currentThread().getName());
 
         log.run();
-
-        System.out.println(Log.contadorFlush);
     }
 
     @Test
@@ -46,8 +34,6 @@ public class SharedBufferTest {
         });
 
         log.run();
-
-        System.out.println(Log.contadorFlush);
     }
 
     @Test
@@ -92,20 +78,3 @@ public class SharedBufferTest {
     }
 }
 
-class SharedJustForTeste extends Shared {
-    private int[] contador = new int[1024];
-
-    @Override
-    public void consome(int i, boolean ultimo) {
-        contador[i] = contador[i] + 1;
-    }
-
-    public int total() {
-        int total = 0;
-        for (int i = 0; i < 1024; i++) {
-            total = total + contador[i];
-        }
-
-        return total;
-    }
-}

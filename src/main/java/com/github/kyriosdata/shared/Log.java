@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2016 Fábio Nogueira de Lucena
+ * Fábrica de Software - Instituto de Informática (UFG)
+ * Creative Commons Attribution 4.0 International License.
+ */
+
 package com.github.kyriosdata.shared;
 
 import java.nio.ByteBuffer;
@@ -5,19 +11,37 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+/**
+ * Implementação de serviço de logging.
+ */
 public class Log implements LogService {
 
-    public static int contadorFlush = 0;
     private static FileManager fm = new FileManager();
     private static Path path = Paths.get("/Users/kyriosdata/tmp/localhost.log");
     private final int BUFFER_SIZE = 64 * 1024;
     private final int EVENTS_SIZE = 1024;
-    private final int INFO = 0;
-    private final int WARN = 1;
-    private final int ERROR = 2;
 
-    private String[] levelNames = {"INFO", "WARN", "FAIL"};
-    private byte[][] level = { { 73, 78, 70, 79 }, { 87, 65, 82, 78 }, {70, 65, 73, 76 } };
+    /**
+     * Constante que indica nível INFO (informação).
+     */
+    private final int INFO = 0;
+
+    /**
+     * Constante que indica nível WARN (aviso).
+     * Situação não necessariamente indesejável.
+     */
+    private final int WARN = 1;
+    private final int FAIL = 2;
+
+    /**
+     * Bytes correspondentes à " INFO ", " WARN " e " FAIL ".
+     * Observe que é empregado um espaço antes e após o nome
+     * de cada nível.
+     */
+    private byte[][] level = {
+            { 32, 73, 78, 70, 79, 32 },
+            { 32, 87, 65, 82, 78, 32 },
+            { 32, 70, 65, 73, 76, 32 } };
 
     // Cache Level 1
     private LogEvent[] eventos = new LogEvent[EVENTS_SIZE];
@@ -32,7 +56,7 @@ public class Log implements LogService {
             eventos[i] = new LogEvent();
         }
 
-        fmt = new InstanteFormatter();
+        fmt = new DateFormat();
 
         shared = new Shared() {
 
@@ -58,14 +82,12 @@ public class Log implements LogService {
             @Override
             public void consome(int v, boolean ultimo) {
 
-                // Instante
-                fmt.formatToBytes(eventos[v].instante, fmt.template);
+                // Instante (24 bytes)
+                byte[] timestamp = fmt.toBytes(eventos[v].instante);
+                transferToBuffer(buffer, timestamp, false);
 
-                // Nível (INFO, WARN ou FAIL)
-                System.arraycopy(level[eventos[v].level], 0, fmt.template, 25, 4);
-
-                // System.out.println(new String(fmt.template, 0, 28, StandardCharsets.UTF_8));
-                transferToBuffer(buffer, fmt.template, false);
+                // Nível (" INFO ", " WARN " ou " FAIL ") (6 bytes)
+                transferToBuffer(buffer, level[eventos[v].level], false);
 
                 // Payload
                 byte[] bytes = eventos[v].payload.getBytes(StandardCharsets.UTF_8);
@@ -110,7 +132,6 @@ public class Log implements LogService {
      * @param buffer Buffer cujo conteúdo deve ser descarregado.
      */
     public static void flush(ByteBuffer buffer) {
-        contadorFlush++;
         buffer.flip();
 
         fm.acrescenta(path, buffer);
@@ -156,14 +177,14 @@ public class Log implements LogService {
 
     @Override
     public void fail(String msg) {
-        log(ERROR, msg);
+        log(FAIL, msg);
     }
 
     /**
      * Produz evento de log carimbado com o instante de tempo
      * corrente (UTC).
      *
-     * @param level Nível do log: INFO, WARN ou ERROR.
+     * @param level Nível do log: INFO, WARN ou FAIL.
      * @param msg   Mensagem associada ao evento.
      */
     private void log(int level, String msg) {
@@ -184,10 +205,10 @@ public class Log implements LogService {
         shared.flush();
     }
 
-    private final InstanteFormatter fmt;
+    private final DateFormat fmt;
 
     /**
-     * Contêiner para um registro de log.
+     * Contêiner para um evento de log.
      */
     private class LogEvent {
         public long instante;
