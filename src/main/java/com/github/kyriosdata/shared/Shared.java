@@ -37,7 +37,7 @@ public class Shared {
 
     // Tamanho da "lista circular" (ring buffer).
     // Necessariamente uma potência de 2.
-    private final int SIZE = 1024;
+    public static final int SIZE = 1024;
 
     // Máscara para "rotacionar" índices
     // Permite substituir "% SIZE" por "& MASCARA" (mais eficiente).
@@ -156,8 +156,6 @@ public class Shared {
 
         // Obém o total de alocados já produzidos
         int totalProducao = totalDaProducao(fa, la);
-
-        System.out.println("Total producao: " + totalProducao);
 
         if (totalProducao > 0) {
             // Alocados e usados é |[fa, lu]| = producao
