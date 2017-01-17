@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Classe que encapsula operações de controle de concorrência
  * em cenário de vários produtores e um único consumidor.
- *
+ * <p>
  * <p>Orientações para o uso correto. O método
  * {@link #aloca()} indica o desejo de produzir (algo), o retorno
  * é um inteiro no intervalo fechado [0, 31], que unicamente
@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * é o índice de um <i>array</i> ou permite identificar, de fato,
  * o dado compartilhado, ou seja, esse valor funciona como um
  * <i>handle</i> para a real informação.
- *
+ * <p>
  * <p>A alocação não é suficiente para o
  * consumo. Antes de ser consumido o valor alocado precisa ser
  * "produzido" pelo método {@link #produz(int)}. O valor fornecido
@@ -27,7 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Noutras palavras, uma chamada desse método com o argumento
  * 7, por exemplo, indica que a informação associada ao valor
  * 7 está disponível para consumo.
- *
+ * <p>
  * <p>O consumo propriamente dito ocorre pelo método {@link #consome(int, boolean)}.
  * O usuário dessa classe deve sobrescrever esse método. Quando chamado
  * sabe-se que a faixa de valores indicada foi produzida e deve ser
@@ -59,27 +59,27 @@ public class Shared {
     /**
      * Consome a informação produzida e associada
      * ao valor indicado.
-     *
+     * <p>
      * <p>Após a execução desse método o valor
      * correspondente estará disponível para
      * reutilização pelo método {@link #aloca()}.
      *
-     * @param v Valor a ser consumido.
+     * @param v      Valor a ser consumido.
      * @param ultimo {@code true} se e somente se
-     *                           é o "último" evento
-     *                           registrado até o momento
-     *                           para consumo.
+     *               é o "último" evento
+     *               registrado até o momento
+     *               para consumo.
      */
-    public void consome(int v, boolean ultimo) {}
+    public void consome(int v, boolean ultimo) {
+    }
 
     /**
      * Indica a produção de informação associada
      * ao valor fornecido.
      *
      * @param v O valor que identifica a produção.
-     *           Esse valor necessariamente deve ser
-     *           obtido do método {@link #aloca()}.
-     *
+     *          Esse valor necessariamente deve ser
+     *          obtido do método {@link #aloca()}.
      * @see #aloca()
      * @see #flush()
      */
@@ -89,7 +89,7 @@ public class Shared {
 
     /**
      * Quantidade de entradas ocupadas (já alocadas).
-     *
+     * <p>
      * <p>Nenhuma das entradas, necessariamente, foi
      * "produzida", mas seguramente já foi alocada.
      *
@@ -111,6 +111,7 @@ public class Shared {
 
     /**
      * Verifica se, no instante em questão, o valor está produzido.
+     *
      * @param v O valor sobre o qual a verificação é feita.
      * @return {@code true} se e somente se, no instante em que a
      * chamada é realizada, o valor fornecido está produzido.
@@ -151,13 +152,24 @@ public class Shared {
             return;
         }
 
-        int fa = lf + 1;
-        int la = ff.get() - 1 + SIZE;
+        realFlush();
 
-        // Obém o total de alocados já produzidos
-        int totalProducao = totalDaProducao(fa, la);
+        working.set(0);
+    }
 
-        if (totalProducao > 0) {
+    private void realFlush() {
+
+        while (true) {
+            int fa = lf + 1;
+            int la = ff.get() - 1 + SIZE;
+
+            // Obém o total de alocados já produzidos
+            int totalProducao = totalDaProducao(fa, la);
+
+            if (totalProducao == 0) {
+                return;
+            }
+
             // Alocados e usados é |[fa, lu]| = producao
             int lu = lf + totalProducao;
 
@@ -180,8 +192,6 @@ public class Shared {
             // Disponibiliza valores para reutilização
             lf = lf + totalProducao;
         }
-
-        working.set(0);
     }
 
     private int totalDaProducao(int first, int last) {
