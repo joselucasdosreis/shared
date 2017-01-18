@@ -3,7 +3,7 @@ package com.github.kyriosdata.shared;
 /**
  * Serviço do qual se obtém o instante corrente.
  */
-interface ClockService {
+interface Clock {
 
     /**
      * Obtém a quantidade de milissegundos transcorridos desde a "epoch" (UTC).

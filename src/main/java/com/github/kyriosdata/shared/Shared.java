@@ -35,13 +35,24 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class Shared {
 
-    // Tamanho da "lista circular" (ring buffer).
-    // Necessariamente uma potência de 2.
+    /**
+     * Tamanho da "lista circular" (ring buffer). Necessariamente uma
+     * potência de 2. Esse valor também indica o máximo de entradas
+     * produzidas e ainda não consumidas.
+     */
     public static final int SIZE = 1024;
 
-    // Máscara para "rotacionar" índices
-    // Permite substituir "% SIZE" por "& MASCARA" (mais eficiente).
-    private final int MASCARA = SIZE - 1;
+    /**
+     * Tamanho do ring buffer. Default é {@link #SIZE}.
+     */
+    private final int size;
+
+    /**
+     * Tamanho da mascara (cache por desempenho).
+     * Definido pelo valor de {@link #size} subtrído
+     * de uma unidade.
+     */
+    private final int mascara;
 
     // Empregada para evitar reentrância do consumidor.
     private AtomicInteger working = new AtomicInteger(0);
@@ -49,12 +60,41 @@ public class Shared {
     // Indica primeira entrada livre (first free).
     private AtomicInteger ff = new AtomicInteger(0);
 
-    // Indica última entrada livre (las free)
+    // Indica última entrada livre (last free)
     private int lf = SIZE - 1;
 
     // Cada byte indica, para o índice (valor) em questão,
     // se há produto disponível (1) ou não (0).
     private byte[] producao = new byte[SIZE];
+
+    /**
+     * Instância de estrutura de dados de concorrência
+     * com total de entradas definido por {@link #SIZE}.
+     *
+     * @see #Shared(int)
+     */
+    public Shared() {
+        this(SIZE);
+    }
+
+    /**
+     * Cria instância de estrutura de dados de concorrência
+     * (produtor/consumidor) com total de entradas indicado.
+     *
+     * @param tamanho Valo que deve ser potência de dois.
+     */
+    public Shared(int tamanho) {
+        // Verifica se o argumento é uma potência de 2.
+        // Observe que uma potência de 2 usa apenas 1 bit com
+        // o valor 1. Curiosamente, uma potência de 2 subtraída
+        // de 1 resulta em valor cujos bits são todos 1.
+        if (tamanho > 0 && ((tamanho & (tamanho - 1)) == 0)) {
+            size = tamanho;
+            mascara = size - 1;
+        } else {
+            throw new IllegalArgumentException("tamanho must be power of 2");
+        }
+    }
 
     /**
      * Consome a informação produzida e associada
@@ -88,24 +128,12 @@ public class Shared {
     }
 
     /**
-     * Quantidade de entradas ocupadas (já alocadas).
-     * <p>
-     * <p>Nenhuma das entradas, necessariamente, foi
-     * "produzida", mas seguramente já foi alocada.
-     *
-     * @return Número de entradas ocupadas.
-     */
-    public int totalAlocados() {
-        return SIZE - totalLiberados();
-    }
-
-    /**
      * Quantidade de entradas disponíveis para alocação.
      *
      * @return Número de entradas (valores) disponíveis
      * para alocação imediata.
      */
-    public int totalLiberados() {
+    public int entradasDisponiveis() {
         return lf - ff.get() + 1;
     }
 
@@ -131,8 +159,8 @@ public class Shared {
             int candidato = ff.get();
             if (candidato <= lf) {
                 if (ff.compareAndSet(candidato, candidato + 1)) {
-                    producao[candidato & MASCARA] = 0;
-                    return candidato & MASCARA;
+                    producao[candidato & mascara] = 0;
+                    return candidato & mascara;
                 }
             } else {
                 flush();
@@ -175,7 +203,7 @@ public class Shared {
 
             // Consome entradas (exceto o último)
             for (int i = fa; i < lu; i++) {
-                int valor = i & MASCARA;
+                int valor = i & mascara;
                 try {
                     consome(valor, false);
                 } catch (Exception exp) {
@@ -186,8 +214,8 @@ public class Shared {
             }
 
             // Indica que se trata do ÚLTIMO
-            consome(lu & MASCARA, true);
-            producao[lu & MASCARA] = 0;
+            consome(lu & mascara, true);
+            producao[lu & mascara] = 0;
 
             // Disponibiliza valores para reutilização
             lf = lf + totalProducao;
@@ -197,7 +225,7 @@ public class Shared {
     private int totalDaProducao(int first, int last) {
         int producao = 0;
         int i = first;
-        while (i <= last && produzido(i & MASCARA)) {
+        while (i <= last && produzido(i & mascara)) {
             i++;
             producao++;
         }

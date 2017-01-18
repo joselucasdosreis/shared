@@ -12,10 +12,6 @@ package com.github.kyriosdata.shared;
  */
 public class Bits {
 
-    // Tamanho da "lista circular" (ring buffer).
-    // Necessariamente uma potência de 2.
-    private final int SIZE = 32;
-
     /**
      * Obtém o valor do n-ésimo bit do inteiro.
      *
@@ -52,18 +48,44 @@ public class Bits {
     }
 
     /**
-     * Produz sequência correspondente à representação binária do inteiro fornecido.
-     * @param produzidos
+     * Verifica se o valor fornecido é uma potência de dois.
+     *
+     * @param valor O valor a ser verificado.
+     *
+     * @return {@code true} se e somente se o valor é uma potência
+     * de dois.
      */
-    public static String showBits(int produzidos) {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 32; i++) {
-            sb.append(Bits.bitValue(produzidos, i));
-            if ((i+1) % 4 == 0) {
-                sb.append(" ");
+    public static boolean potenciaDois(int valor) {
+        return valor > 0 && ((valor & (valor - 1)) == 0);
+    }
+
+    /**
+     * Representação em sequência de caracteres dos bits do
+     * valor.
+     * @param valor O valor.
+     * @return Sequência de bits do valor, do mais significativo para
+     * o menos significativo. Um espaço em branco separa cada 4
+     * bits exibidos.
+     */
+    public static String showBits2(int valor) {
+        char[] bits = new char[39];
+
+        // Última posição da saída
+        int indexSaida = 0;
+
+        // Percorre todos os bits
+        for (int i = 31; i > 0; i--) {
+            bits[indexSaida] = (char) (Bits.bitValue(valor, i) + '0');
+
+            if ((i & 3) == 0) {
+                bits[++indexSaida] = ' ';
             }
+
+            indexSaida++;
         }
 
-        return sb.toString();
+        bits[indexSaida] = (char) (Bits.bitValue(valor, 0) + '0');
+
+        return new String(bits);
     }
 }

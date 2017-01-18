@@ -3,7 +3,7 @@ package com.github.kyriosdata.shared;
 /**
  * Implementação de serviço que recupera instante corrente.
  */
-public class SystemClock implements ClockService {
+public class SystemClock implements Clock {
 
     /**
      * Milissegundos transcorridos desde a "epoch"

@@ -2,11 +2,45 @@ package com.github.kyriosdata.shared;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class SharedTest {
+
+    static int valor = 0;
+
+    @Test
+    public void consumidorQueGeraExcecaoNaoInterrompeDemais() {
+
+        Shared s = new Shared() {
+            @Override
+            public void consome(int i, boolean u) {
+                if (i == 0) {
+                    throw new RuntimeException();
+                } else {
+                    valor++;
+                }
+            }
+        };
+
+        // Três produções, primeira falha, ao
+        // contrários das demais, que acrescenta valor.
+        s.produz(s.aloca());
+        s.produz(s.aloca());
+        s.produz(s.aloca());
+
+        s.flush();
+
+        assertEquals(2, valor);
+    }
+
+    @Test
+    public void potenciaDeDoisObrigatoriaParaTamanho() {
+        assertThrows(IllegalArgumentException.class, () -> new Shared(-1));
+        assertThrows(IllegalArgumentException.class, () -> new Shared(3));
+    }
 
     @Test
     public void alocaSequencialmenteZeroToTrintaUm() {
@@ -39,8 +73,8 @@ public class SharedTest {
     @Test
     public void verificaEstadoInicial() {
         Shared s = new Shared();
-        assertEquals(Shared.SIZE, s.totalLiberados());
-        assertEquals(0, s.totalAlocados());
+        assertEquals(Shared.SIZE, s.entradasDisponiveis());
+        assertEquals(0, Shared.SIZE - s.entradasDisponiveis());
     }
 
     @Test
@@ -49,8 +83,8 @@ public class SharedTest {
         assertEquals(0, s.aloca());
         assertEquals(1, s.aloca());
 
-        assertEquals(Shared.SIZE - 2, s.totalLiberados());
-        assertEquals(2, s.totalAlocados());
+        assertEquals(Shared.SIZE - 2, s.entradasDisponiveis());
+        assertEquals(2, Shared.SIZE - s.entradasDisponiveis());
     }
 
     @Test
@@ -61,8 +95,8 @@ public class SharedTest {
         s.produz(0);
         s.flush();
 
-        assertEquals(Shared.SIZE, s.totalLiberados());
-        assertEquals(0, s.totalAlocados());
+        assertEquals(Shared.SIZE, s.entradasDisponiveis());
+        assertEquals(0, Shared.SIZE - s.entradasDisponiveis());
         assertFalse(s.produzido(0));
     }
 
@@ -75,13 +109,13 @@ public class SharedTest {
             s.produz(i);
         }
 
-        assertEquals(Shared.SIZE, s.totalAlocados());
-        assertEquals(0, s.totalLiberados());
+        assertEquals(Shared.SIZE, Shared.SIZE - s.entradasDisponiveis());
+        assertEquals(0, s.entradasDisponiveis());
 
         s.flush();
 
-        assertEquals(0, s.totalAlocados());
-        assertEquals(Shared.SIZE, s.totalLiberados());
+        assertEquals(0, Shared.SIZE - s.entradasDisponiveis());
+        assertEquals(Shared.SIZE, s.entradasDisponiveis());
     }
 
     @Test
@@ -89,13 +123,15 @@ public class SharedTest {
         Shared s = new Shared();
 
         for (int i = 0; i < Shared.SIZE; i++) {
-            assertEquals(i, s.aloca());
+            int alocado = s.aloca();
+            assertFalse(s.produzido(alocado));
+            assertEquals(i, alocado);
         }
 
         s.flush();
 
-        assertEquals(Shared.SIZE, s.totalAlocados());
-        assertEquals(0, s.totalLiberados());
+        assertEquals(Shared.SIZE, Shared.SIZE - s.entradasDisponiveis());
+        assertEquals(0, s.entradasDisponiveis());
     }
 
     @Test
@@ -107,26 +143,26 @@ public class SharedTest {
             assertEquals(i, shared.aloca());
         }
 
-        assertEquals(Shared.SIZE, shared.totalAlocados());
-        assertEquals(0, shared.totalLiberados());
+        assertEquals(Shared.SIZE, Shared.SIZE - shared.entradasDisponiveis());
+        assertEquals(0, shared.entradasDisponiveis());
 
         // 1 usado
         shared.produz(0);
-        assertEquals(Shared.SIZE, shared.totalAlocados());
-        assertEquals(0, shared.totalLiberados());
+        assertEquals(Shared.SIZE, Shared.SIZE - shared.entradasDisponiveis());
+        assertEquals(0, shared.entradasDisponiveis());
 
         // Único usado é limpado
         shared.flush();
 
-        assertEquals(Shared.SIZE - 1, shared.totalAlocados());
-        assertEquals(1, shared.totalLiberados());
+        assertEquals(Shared.SIZE - 1, Shared.SIZE - shared.entradasDisponiveis());
+        assertEquals(1, shared.entradasDisponiveis());
 
         // Aloca o único liberado
         // 32 alocados, 0 liberados
         int unicoLiberado = shared.aloca();
         assertEquals(0, unicoLiberado);
-        assertEquals(Shared.SIZE, shared.totalAlocados());
-        assertEquals(0, shared.totalLiberados());
+        assertEquals(Shared.SIZE, Shared.SIZE - shared.entradasDisponiveis());
+        assertEquals(0, shared.entradasDisponiveis());
 
         // 32 usados
         for (int i = 0; i < Shared.SIZE; i++) {
@@ -137,8 +173,8 @@ public class SharedTest {
         // Ao chamar aloca() -> chamar flush() e alocar o primeiro 0.
         int alocado = shared.aloca();
         assertEquals(1, alocado);
-        assertEquals(1, shared.totalAlocados());
-        assertEquals(Shared.SIZE - 1, shared.totalLiberados());
+        assertEquals(1, Shared.SIZE - shared.entradasDisponiveis());
+        assertEquals(Shared.SIZE - 1, shared.entradasDisponiveis());
     }
 
     @Test
@@ -163,6 +199,9 @@ public class SharedTest {
     @Test
     public void comVariasThreads() throws Exception {
         SharedJustForTeste shared = new SharedJustForTeste();
+
+        ScheduledThreadPoolExecutor scheduler = new ScheduledThreadPoolExecutor(2);
+        scheduler.scheduleWithFixedDelay(shared, 10, 50, TimeUnit.MILLISECONDS);
 
         executaThreads(() -> {
             for (int i = 0; i < 3_600; i++) {
@@ -207,7 +246,7 @@ public class SharedTest {
     }
 }
 
-class SharedJustForTeste extends Shared {
+class SharedJustForTeste extends Shared implements Runnable {
     private int[] contador = new int[1024];
 
     @Override
@@ -222,5 +261,10 @@ class SharedJustForTeste extends Shared {
         }
 
         return total;
+    }
+
+    @Override
+    public void run() {
+        flush();
     }
 }

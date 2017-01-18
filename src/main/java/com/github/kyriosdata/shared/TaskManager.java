@@ -29,7 +29,17 @@ public class TaskManager {
         taskExecutor = Executors.newFixedThreadPool(2);
     }
 
-    public void novoAgendamento(Runnable r) {
-        agenda.scheduleWithFixedDelay(r, 1000, 1000, TimeUnit.MILLISECONDS);
+    /**
+     * Cria agendamento a ser realizado indefinidamente, de tempos em
+     * tempos, com retardo inicial.
+     *
+     * @param r Tarefa a ser executada.
+     * @param initialDelay Atraso inicial para início da execução.
+     *
+     * @param delay Intervalo entre as execuções.
+     */
+    public void repita(Runnable r, int initialDelay, int delay) {
+
+        agenda.scheduleWithFixedDelay(r, initialDelay, delay, TimeUnit.MILLISECONDS);
     }
 }
