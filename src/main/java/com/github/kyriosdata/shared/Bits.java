@@ -67,7 +67,7 @@ public class Bits {
      * o menos significativo. Um espaço em branco separa cada 4
      * bits exibidos.
      */
-    public static String showBits2(int valor) {
+    public static String bitsToString(int valor) {
         char[] bits = new char[39];
 
         // Última posição da saída

@@ -14,7 +14,7 @@ import java.nio.charset.StandardCharsets;
  */
 public class Logging implements Log, Runnable {
 
-    private static FileManager fm = new FileManager("/Users/kyriosdata/tmp/localhost.log");
+    private FileManager fm = new FileManager("/Users/kyriosdata/tmp/localhost.log");
     private final int BUFFER_SIZE = 64 * 1024;
     private final int EVENTS_SIZE = 1024;
 
@@ -84,42 +84,43 @@ public class Logging implements Log, Runnable {
 
                 // Instante (24 bytes)
                 byte[] timestamp = fmt.toBytes(eventos[v].instante);
-                transferToBuffer(buffer, timestamp, false);
+                transferToBuffer(buffer, timestamp, timestamp.length - 1, false);
 
                 // Nível (" INFO ", " WARN " ou " FAIL ") (6 bytes)
-                transferToBuffer(buffer, level[eventos[v].level], false);
+                transferToBuffer(buffer, level[eventos[v].level], level[eventos[v].level].length - 1, false);
 
                 // Payload (tamanho variável)
                 // TODO substituir getBytes por char[], wrap, CharsetEncoder.
                 byte[] bytes = eventos[v].payload.getBytes(StandardCharsets.UTF_8);
-                transferToBuffer(buffer, bytes, false);
+                transferToBuffer(buffer, bytes, bytes.length - 1, false);
 
                 // Newline
-                transferToBuffer(buffer, NEWLINE, ultimo);
+                transferToBuffer(buffer, NEWLINE, NEWLINE.length - 1, ultimo);
             }
         };
     }
 
     /**
-     * Transfere para buffer o conteúdo do vetor de bytes. Se durante a
+     * Transfere para o buffer o conteúdo do vetor de bytes, desde o
+     * primeiro byte do vetor até a posição final. Se durante a
      * cópia o buffer enche, então um "flush" é realizado. O "flush"
      * é realizado mesmo que o buffer não esteja cheio, mas pela
      * indicação do argumento.
      *
      * @param buffer Buffer para o qual bytes serão copiados.
      * @param bytes Vetor de bytes a ser copiado.
-     *
+     * @param fim
      * @param flush Indica que flush do buffer deve ser realizado, mesmo
-     *              que não esteja cheio.
+ *              que não esteja cheio.
      */
-    public static void transferToBuffer(ByteBuffer buffer, byte[] bytes, boolean flush) {
-        int resto = Buffers.copyToBuffer(buffer, bytes, 0, bytes.length - 1);
+    public void transferToBuffer(ByteBuffer buffer, byte[] bytes, int fim, boolean flush) {
+        int resto = Buffers.copyToBuffer(buffer, bytes, 0, fim);
         while (resto != 0) {
 
             // Buffer cheio
             flush(buffer);
 
-            resto = Buffers.copyToBuffer(buffer, bytes, bytes.length - resto, bytes.length - 1);
+            resto = Buffers.copyToBuffer(buffer, bytes, fim - resto + 1, fim);
         }
 
         if (flush) {
@@ -132,7 +133,7 @@ public class Logging implements Log, Runnable {
      *
      * @param buffer Buffer cujo conteúdo deve ser descarregado.
      */
-    public static void flush(ByteBuffer buffer) {
+    public void flush(ByteBuffer buffer) {
         buffer.flip();
 
         fm.acrescenta(buffer);

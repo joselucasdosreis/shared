@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2016 Fábio Nogueira de Lucena
+ * Fábrica de Software - Instituto de Informática (UFG)
+ * Creative Commons Attribution 4.0 International License.
+ */
+
 package com.github.kyriosdata.shared;
 
 import java.nio.ByteBuffer;
@@ -25,7 +31,7 @@ public class Buffers {
     public static int copyToBuffer(ByteBuffer buffer, byte[] payload, int inicio, int fim) {
 
         int restante = buffer.remaining();
-        int pretendido = payload.length - inicio;
+        int pretendido = fim - inicio + 1;
 
         int quantos = pretendido > restante ? restante : pretendido;
 

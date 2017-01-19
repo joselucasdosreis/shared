@@ -86,13 +86,15 @@ public class LoggingTest {
 
     @Test
     public void reutilizandoByteBuffer() {
+        Logging log = new Logging();
+
         byte[] saude = "saúde".getBytes(StandardCharsets.UTF_8);
         byte[] vida = "vida".getBytes(StandardCharsets.UTF_8);
 
         ByteBuffer buffer = ByteBuffer.allocate(10);
 
-        Logging.transferToBuffer(buffer, saude, false);
-        Logging.transferToBuffer(buffer, vida, true);
+        log.transferToBuffer(buffer, saude, saude.length - 1, false);
+        log.transferToBuffer(buffer, vida, vida.length - 1, true);
 
         assertEquals("saúdevida", new String(buffer.array()));
     }

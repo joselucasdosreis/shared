@@ -31,13 +31,13 @@ public class BitsTest {
 
     @Test
     public void exibeBits() {
-        String s0 = Bits.showBits2(0);
+        String s0 = Bits.bitsToString(0);
         assertEquals("0000 0000 0000 0000 0000 0000 0000 0000", s0);
 
-        String s1 = Bits.showBits2(1);
+        String s1 = Bits.bitsToString(1);
         assertEquals("0000 0000 0000 0000 0000 0000 0000 0001", s1);
 
-        String s31 = Bits.showBits2(1 << 31);
+        String s31 = Bits.bitsToString(1 << 31);
         assertEquals("1000 0000 0000 0000 0000 0000 0000 0000", s31);
     }
 
