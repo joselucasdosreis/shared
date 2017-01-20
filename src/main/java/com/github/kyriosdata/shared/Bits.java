@@ -19,7 +19,7 @@ public class Bits {
      * @param n O n-ésimo (zero-based) bit.
      * @return O valor do n-ésimo bit do inteiro.
      */
-    public static int bitValue(int x, int n) {
+    public static int value(int x, int n) {
         return (x & (1 << n)) >>> n;
     }
 
@@ -55,7 +55,7 @@ public class Bits {
      * @return {@code true} se e somente se o valor é uma potência
      * de dois.
      */
-    public static boolean potenciaDois(int valor) {
+    public static boolean isPowerOfTwo(int valor) {
         return valor > 0 && ((valor & (valor - 1)) == 0);
     }
 
@@ -75,7 +75,7 @@ public class Bits {
 
         // Percorre todos os bits
         for (int i = 31; i > 0; i--) {
-            bits[indexSaida] = (char) (Bits.bitValue(valor, i) + '0');
+            bits[indexSaida] = (char) (Bits.value(valor, i) + '0');
 
             if ((i & 3) == 0) {
                 bits[++indexSaida] = ' ';
@@ -84,7 +84,7 @@ public class Bits {
             indexSaida++;
         }
 
-        bits[indexSaida] = (char) (Bits.bitValue(valor, 0) + '0');
+        bits[indexSaida] = (char) (Bits.value(valor, 0) + '0');
 
         return new String(bits);
     }

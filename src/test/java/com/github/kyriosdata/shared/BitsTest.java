@@ -16,13 +16,13 @@ public class BitsTest {
         int random = (int)(Math.random() * Integer.MAX_VALUE);
 
         for (int i = 0; i < 32; i++) {
-            int bit = Bits.bitValue(random, i);
+            int bit = Bits.value(random, i);
 
             int afterSet = Bits.set(random, i);
-            assertEquals(1, Bits.bitValue(afterSet, i), "Valor: " + random + " i: " + i);
+            assertEquals(1, Bits.value(afterSet, i), "Valor: " + random + " i: " + i);
 
             int afterCls = Bits.cls(random, i);
-            assertEquals(0, Bits.bitValue(afterCls, i), "Valor: " + random + " i: " + i);
+            assertEquals(0, Bits.value(afterCls, i), "Valor: " + random + " i: " + i);
 
             int calculado = bit == 0 ? afterCls : afterSet;
             assertEquals(random, calculado, "Valor: " + random + " i: " + i);
@@ -43,12 +43,12 @@ public class BitsTest {
 
     @Test
     public void potenciaDeDois() {
-        assertTrue(Bits.potenciaDois(1));
-        assertTrue(Bits.potenciaDois(2));
-        assertTrue(Bits.potenciaDois(4));
-        assertTrue(Bits.potenciaDois(1024));
+        assertTrue(Bits.isPowerOfTwo(1));
+        assertTrue(Bits.isPowerOfTwo(2));
+        assertTrue(Bits.isPowerOfTwo(4));
+        assertTrue(Bits.isPowerOfTwo(1024));
 
-        assertFalse(Bits.potenciaDois(3));
-        assertFalse(Bits.potenciaDois(1025));
+        assertFalse(Bits.isPowerOfTwo(3));
+        assertFalse(Bits.isPowerOfTwo(1025));
     }
 }

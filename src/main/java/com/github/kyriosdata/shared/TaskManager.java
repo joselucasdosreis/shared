@@ -35,7 +35,7 @@ public class TaskManager {
     }
 
     /**
-     * Cria agendamento a ser realizado indefinidamente, de tempos em
+     * Cria agendamento a ser executado indefinidamente, de tempos em
      * tempos, com retardo inicial.
      *
      * @param r Tarefa a ser executada.
