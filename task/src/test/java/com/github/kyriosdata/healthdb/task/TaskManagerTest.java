@@ -1,4 +1,4 @@
-package com.github.kyriosdata.shared;
+package com.github.kyriosdata.healthdb.task;
 
 import org.junit.jupiter.api.Test;
 

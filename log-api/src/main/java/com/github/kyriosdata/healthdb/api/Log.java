@@ -4,7 +4,7 @@
  * Creative Commons Attribution 4.0 International License.
  */
 
-package com.github.kyriosdata.shared;
+package com.github.kyriosdata.healthdb.api;
 
 /**
  * Definição de serviços de <i>logging</i>.
@@ -12,7 +12,7 @@ package com.github.kyriosdata.shared;
  * <p>Orientações sobre separação da interface e da implementação correspondente.
  *     http://softwareengineering.stackexchange.com/questions/246620/in-java-what-are-some-good-ways-to-separate-apis-from-implementation-of-entire
  */
-interface Log {
+public interface Log {
     /**
      * Registra mensagem de log (informativa).
      *

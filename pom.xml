@@ -10,8 +10,13 @@
 
     <groupId>com.github.kyriosdata.shared</groupId>
     <artifactId>shared</artifactId>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
     <version>1.0.0</version>
+    <modules>
+        <module>log-api</module>
+        <module>log-hdb</module>
+        <module>task</module>
+    </modules>
 
     <name>com.github.kyriosdata.shared:shared</name>
 

@@ -1,4 +1,4 @@
-package com.github.kyriosdata.shared;
+package com.github.kyriosdata.healthdb.log;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -6,17 +6,20 @@ import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class LoggingTest {
 
+    private ScheduledThreadPoolExecutor agenda = new ScheduledThreadPoolExecutor(2);
+
     @Test
     public void singleLog() {
         Logging log = new Logging();
 
-        TaskManager tm = new TaskManager();
-        tm.repita(log, 1000, 1000);
+        agenda.scheduleWithFixedDelay(log, 1000, 1000, TimeUnit.MILLISECONDS);
 
         log.fail("ThreadName: " + Thread.currentThread().getName());
 
@@ -27,10 +30,7 @@ public class LoggingTest {
     public void log4h() {
         Logging log = new Logging();
 
-        // Gerenciador de tarefas
-        // (para flush do conteúdo de log agendado)
-        TaskManager tm = new TaskManager();
-        tm.repita(log, 1000, 1000);
+        agenda.scheduleWithFixedDelay(log, 1000, 1000, TimeUnit.MILLISECONDS);
 
         String msg = "ThreadName: " + Thread.currentThread().getName();
 

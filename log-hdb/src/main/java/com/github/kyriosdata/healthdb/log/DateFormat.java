@@ -15,7 +15,7 @@
  * limitations under the license.
  */
 
-package com.github.kyriosdata.shared;
+package com.github.kyriosdata.healthdb.log;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;

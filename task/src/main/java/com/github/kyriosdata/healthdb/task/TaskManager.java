@@ -4,7 +4,7 @@
  * Creative Commons Attribution 4.0 International License.
  */
 
-package com.github.kyriosdata.shared;
+package com.github.kyriosdata.healthdb.task;
 
 import java.util.ArrayList;
 import java.util.List;

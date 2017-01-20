@@ -4,7 +4,7 @@
  * Creative Commons Attribution 4.0 International License.
  */
 
-package com.github.kyriosdata.shared;
+package com.github.kyriosdata.healthdb.log;
 
 import java.nio.ByteBuffer;
 
