@@ -15,10 +15,12 @@ import java.nio.file.Paths;
 import java.util.*;
 
 /**
- * Recuperação de valores (propriedades) baseadas em pares (chave/valor)
- * depositadas em um arquivo texto. Não há como criar uma instância dessa
- * classe contendo propriedades senão pela existência de um arquivo de
- * entrada.
+ * Encapsula valores (propriedades) obtidas de pares (chave/valor)
+ * depositadas em um arquivo texto. Um arquivo texto é a única forma
+ * de criação de uma instância dessa classs.
+ *
+ * <p>Valores de uma configuração não podem ser alterados,
+ * são <i>read only</i>.
  *
  * <p>Propriedades são pares definidos por uma chave separada do valor
  * pelo símbolo '='. Por exemplo, <code>port=80</code> defina a
@@ -26,7 +28,7 @@ import java.util.*;
  * fornecida em cada linha. Além de um par, uma linha pode ser
  * vazia (o que não produz nenhum efeito) ou fornecer algum comentário,
  * o que é indicado pelo primeiro caractere da linha que deve ser ';'.
- * <p>
+ *
  * <p>O caminho completo de um arquivo de propriedade deve ser
  * fornecido quando uma instância é criada. Caso contrário, o arquivo
  * indicado é procurado no <i>classpath</i>. A criação de uma instância
@@ -40,22 +42,50 @@ public class Configuracao {
     /**
      * Tamanho máximo de um arquivo de configuração.
      */
-    private final int MAX_SIZE = 4096;
+    public final int MAX_SIZE = 4096;
 
-    private Map<String, String> propriedades;
+    /**
+     * Mantém conjunto de pares (chave/valor) da configuração.
+     */
+    private Map<String, String> propriedades =
+            Collections.unmodifiableMap(new HashMap<>(0));
 
+    /**
+     * Cria instância de configuração baseada no arquivo fornecido.
+     * Deve ser fornecido o nome (<i>path</i>) completo do arquivo
+     * ou, caso contrário, a busca será realizada pelo nome no
+     * 'classpath' da aplicação.
+     * <p>
+     * <p>O arquivo de configuração deve possuir, no máximo,
+     * {@link #MAX_SIZE} bytes. Um arquivo com tamanho superior
+     * será ignorado. Ou seja, nenhuma propriedade será disponibilizada
+     * por meio da instância criada.
+     * <p>
+     * <p>Caso ocorra algum erro de leitura do arquivo, nenhuma
+     * propriedade estará disponível por meio da instância criada.
+     *
+     * @param filename Nome do arquivo a ser procurado no 'classpath' ou,
+     *                 o arquivo conforme o nome completo fornecido.
+     */
     public Configuracao(String filename) {
+
+        try {
+            getPropriedades(filename);
+        } catch (Exception exp) {
+            // Do nothing.
+        } finally {
+            propriedades = Collections.unmodifiableMap(propriedades);
+        }
+    }
+
+    private void getPropriedades(String filename) throws IOException {
 
         Path path = getConfigFilePath(filename);
         if (path == null) {
             return;
         }
 
-        try {
-            if (Files.size(path) > MAX_SIZE) {
-                return;
-            }
-        } catch (IOException ioe) {
+        if (Files.size(path) > MAX_SIZE) {
             return;
         }
 
@@ -93,8 +123,16 @@ public class Configuracao {
         }
     }
 
-    public String getValor(String chave) {
-        return propriedades.get(chave);
+    /**
+     * Recupera o valor da propriedade fornecida.
+     *
+     * @param propriedade Nome da propriedade ou chave.
+     *
+     * @return O valor da propriedade ou {@code null},
+     * caso a propriedade não esteja definida.
+     */
+    public String valor(String propriedade) {
+        return propriedades.get(propriedade);
     }
 
     /**
@@ -120,7 +158,7 @@ public class Configuracao {
      * arquivo contendo a configuração a ser carregada.
      * @throws NullPointerException Se o argumento é {@code null}.
      */
-    public static Path getConfigFilePath(String filename) {
+    private static Path getConfigFilePath(String filename) {
 
         URL url = ClassLoader.getSystemResource(filename);
 
