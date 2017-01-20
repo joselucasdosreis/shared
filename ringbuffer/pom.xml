@@ -11,5 +11,12 @@
 
     <artifactId>ringbuffer</artifactId>
 
+    <dependencies>
+        <dependency>
+            <groupId>com.github.kyriosdata.ringBuffer</groupId>
+            <artifactId>system-hdb</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+    </dependencies>
 
 </project>

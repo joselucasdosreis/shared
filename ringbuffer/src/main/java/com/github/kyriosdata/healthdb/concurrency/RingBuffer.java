@@ -6,6 +6,8 @@
 
 package com.github.kyriosdata.healthdb.concurrency;
 
+import com.github.kyriosdata.healthdb.system.Bits;
+
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -88,7 +90,7 @@ public class RingBuffer {
         // Observe que uma potência de 2 usa apenas 1 bit com
         // o valor 1. Curiosamente, uma potência de 2 subtraída
         // de 1 resulta em valor cujos bits são todos 1.
-        if (tamanho > 0 && ((tamanho & (tamanho - 1)) == 0)) {
+        if (Bits.isPowerOfTwo(tamanho)) {
             size = tamanho;
             mascara = size - 1;
         } else {
