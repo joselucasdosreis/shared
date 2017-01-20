@@ -7,6 +7,7 @@
 package com.github.kyriosdata.healthdb.log;
 
 import com.github.kyriosdata.healthdb.api.Log;
+import com.github.kyriosdata.healthdb.concurrency.RingBuffer;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -51,7 +52,7 @@ public class Logging implements Log, Runnable {
     // Vetor de bytes correspondente ao caractere de "nova linha"
     private final byte[] NEWLINE = { 10 };
 
-    private Shared shared;
+    private RingBuffer shared;
 
     public Logging() {
         for (int i = 0; i < EVENTS_SIZE; i++) {
@@ -60,7 +61,7 @@ public class Logging implements Log, Runnable {
 
         fmt = new DateFormat();
 
-        shared = new Shared() {
+        shared = new RingBuffer() {
 
             /**
              * Consome o evento de log associado ao valor.

@@ -8,10 +8,11 @@
     <!-- mvn javadoc:aggregate-jar (javadoc em jar) -->
     <!-- mvn source:jar (os fontes em jar)          -->
 
-    <groupId>com.github.kyriosdata.ringBuffer</groupId>
-    <artifactId>ringBuffer</artifactId>
+    <groupId>com.github.kyriosdata.hdb</groupId>
+    <artifactId>healthdb</artifactId>
     <packaging>pom</packaging>
     <version>1.0.0</version>
+
     <modules>
         <module>log-api</module>
         <module>log-hdb</module>
