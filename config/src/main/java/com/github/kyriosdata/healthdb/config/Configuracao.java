@@ -42,11 +42,6 @@ public class Configuracao {
      */
     private final int MAX_SIZE = 4096;
 
-    /**
-     * Sequência vazia de caracteres.
-     */
-    private final String EMPTY = "";
-
     private Map<String, String> propriedades;
 
     public Configuracao(String filename) {
