@@ -20,6 +20,7 @@
         <module>system-api</module>
         <module>system-hdb</module>
         <module>startup</module>
+        <module>config</module>
     </modules>
 
     <name>com.github.kyriosdata.ringBuffer:ringBuffer</name>

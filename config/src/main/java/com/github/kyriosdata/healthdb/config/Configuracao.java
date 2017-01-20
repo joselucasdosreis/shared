@@ -4,7 +4,7 @@
  * Creative Commons Attribution 4.0 International License.
  */
 
-package com.github.kyriosdata.healthdb.system;
+package com.github.kyriosdata.healthdb.config;
 
 import java.io.BufferedReader;
 import java.io.IOException;

@@ -1,4 +1,4 @@
-package com.github.kyriosdata.system;
+package com.github.kyriosdata.healthdb.config;
 
 import org.junit.jupiter.api.Test;
 
