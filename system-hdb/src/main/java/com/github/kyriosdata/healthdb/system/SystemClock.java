@@ -6,6 +6,8 @@
 
 package com.github.kyriosdata.healthdb.system;
 
+import com.github.kyriosdata.healthdb.api.Clock;
+
 /**
  * Implementação de serviço que recupera instante corrente.
  */

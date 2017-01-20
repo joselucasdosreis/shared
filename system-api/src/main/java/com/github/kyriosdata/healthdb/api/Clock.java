@@ -9,7 +9,7 @@ package com.github.kyriosdata.healthdb.api;
 /**
  * Serviço do qual se obtém o instante corrente.
  */
-interface Clock {
+public interface Clock {
 
     /**
      * Obtém a quantidade de milissegundos transcorridos desde a "epoch" (UTC).

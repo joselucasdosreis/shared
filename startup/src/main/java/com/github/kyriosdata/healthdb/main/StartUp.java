@@ -45,9 +45,11 @@ public class StartUp {
          * Check permissions
          * Log resultados de check
          *
-         * FASE 3 - iniciar componentes
+         * FASE 3 - fabricar componentes
          *
-         * FASE 4 - verificar operação de componentes
+         * FASE 4 - iniciar componentes
+         *
+         * FASE 5 - verificar operação de componentes
          */
 
     }
