@@ -8,23 +8,27 @@
     <!-- mvn javadoc:aggregate-jar (javadoc em jar) -->
     <!-- mvn source:jar (os fontes em jar)          -->
 
-    <groupId>com.github.kyriosdata.shared</groupId>
-    <artifactId>shared</artifactId>
+    <groupId>com.github.kyriosdata.ringBuffer</groupId>
+    <artifactId>ringBuffer</artifactId>
     <packaging>pom</packaging>
     <version>1.0.0</version>
     <modules>
         <module>log-api</module>
         <module>log-hdb</module>
         <module>task</module>
+        <module>ringbuffer</module>
+        <module>system-api</module>
+        <module>system-hdb</module>
+        <module>startup</module>
     </modules>
 
-    <name>com.github.kyriosdata.shared:shared</name>
+    <name>com.github.kyriosdata.ringBuffer:ringBuffer</name>
 
     <description>
         Serviço para controle concorrente a valores.
     </description>
 
-    <url>https://github.com/kyriosdata/shared</url>
+    <url>https://github.com/kyriosdata/ringBuffer</url>
 
     <organization>
         <name>Instituto de Informática (UFG) - Fábrica de Software</name>
@@ -55,9 +59,9 @@
     </developers>
 
     <scm>
-        <connection>scm:git:https://github.com/kyriosdata/shared.git</connection>
-        <developerConnection>scm:git:https://github.com/kyriosdata/shared.git</developerConnection>
-        <url>https://github.com/kyriosdata/shared</url>
+        <connection>scm:git:https://github.com/kyriosdata/ringBuffer.git</connection>
+        <developerConnection>scm:git:https://github.com/kyriosdata/ringBuffer.git</developerConnection>
+        <url>https://github.com/kyriosdata/ringBuffer</url>
     </scm>
 
     <properties>
