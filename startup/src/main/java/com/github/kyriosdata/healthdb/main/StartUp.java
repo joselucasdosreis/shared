@@ -1,15 +1,16 @@
 package com.github.kyriosdata.healthdb.main;
 
 /**
- * Encapsulamento de procedimentos de inicialização de programas
- * complexos.
+ * Encapsulamento de inicialização de programas
+ * complexos. A inicialização é definida por um conjunto
+ * de procedimentos ordenados. Cada um dos procedimentos
+ * é executado e produz um resultado, que pode interromper
+ * a sequência de execução. A entrada é fornecida por um
+ * arquivo texto, e a saída pelo serviço de <i>logging</i>
+ * empregado.
  *
- * <p>A execução dos procedimentos definidos retorna
- * o valor 0 apenas quando são executados satisfatoriamente,
- * sem exceção. Caso contrário, um valor diferente de zero é
- * retornado, conforme a situação excepcional.
- *
- * <p>A inicialização é dividida em fases.
+ * <p>A inicialização (a sequência de procedimentos) é dividida
+ * em fases.
  *
  * <p><b>Recursos físicos (fase 0)</b>. Responsável pela verificação
  * de disponibilidade de memória, CPU, e outros relevantes para o
@@ -26,31 +27,29 @@ package com.github.kyriosdata.healthdb.main;
  */
 public class StartUp {
 
+    /**
+     * FASE 0 - Serviços oferecidos pelo StartUp
+     * Get tempo corrente -> inicio
+     * Start logging
+     * Log início
+     * Get configuração
+     * Log configuração
+     *
+     * FASE 1
+     * Check RAM
+     * Check CPU
+     * Check permissions
+     * Log resultados de check
+     *
+     * FASE 2 - fabricar componentes
+     *
+     * FASE 4 - iniciar componentes
+     *
+     * FASE 5 - verificar operação de componentes
+     */
     public static void main(String[] args) {
 
-        /**
-         * FASE 0 (configuração disponível)
-         * Get tempo corrente (início)
-         * Get configuracao
-         *
-         * FASE 1 (inicia serviço de logging)
-         * Start process manager
-         * Start logging
-         * Log tempo de início dos procedimentos
-         * Log configuração recuperada
-         *
-         * FASE 2 (recursos mínimos)
-         * Check RAM
-         * Check CPU
-         * Check permissions
-         * Log resultados de check
-         *
-         * FASE 3 - fabricar componentes
-         *
-         * FASE 4 - iniciar componentes
-         *
-         * FASE 5 - verificar operação de componentes
-         */
-
+        // FASE 0 - Serviços oferecidos pelo StartUp
+        long startTime = System.currentTimeMillis();
     }
 }

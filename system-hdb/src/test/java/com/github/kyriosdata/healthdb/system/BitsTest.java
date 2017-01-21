@@ -9,6 +9,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class BitsTest {
 
     @Test
+    public void ordemDosBitsMaisSignificativoEsquerda() {
+        int valorUm = 1;
+        assertEquals(1, Bits.value(valorUm, 0));
+    }
+
+    @Test
     public void setUnsetBits() {
         int v = 0;
 

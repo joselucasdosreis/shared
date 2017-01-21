@@ -22,15 +22,16 @@
         <module>system-hdb</module>
         <module>startup</module>
         <module>config</module>
+        <module>hdb-file</module>
     </modules>
 
-    <name>com.github.kyriosdata.ringBuffer:ringBuffer</name>
+    <name>com.github.kyriosdata.hdb:healthdb</name>
 
     <description>
-        Serviço para controle concorrente a valores.
+        HealthDB - Health Database Management System
     </description>
 
-    <url>https://github.com/kyriosdata/ringBuffer</url>
+    <url>https://github.com/kyriosdata/db</url>
 
     <organization>
         <name>Instituto de Informática (UFG) - Fábrica de Software</name>
@@ -61,8 +62,8 @@
     </developers>
 
     <scm>
-        <connection>scm:git:https://github.com/kyriosdata/ringBuffer.git</connection>
-        <developerConnection>scm:git:https://github.com/kyriosdata/ringBuffer.git</developerConnection>
+        <connection>scm:git:https://github.com/kyriosdata/db.git</connection>
+        <developerConnection>scm:git:https://github.com/kyriosdata/db.git</developerConnection>
         <url>https://github.com/kyriosdata/ringBuffer</url>
     </scm>
 

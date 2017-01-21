@@ -13,7 +13,8 @@ package com.github.kyriosdata.healthdb.system;
 public class Bits {
 
     /**
-     * Obtém o valor do n-ésimo bit do inteiro.
+     * Obtém o valor do n-ésimo bit do inteiro, contado do
+     * menos significativo (direita) para o mais significativo (esquerda).
      *
      * @param x O inteiro.
      * @param n O n-ésimo (zero-based) bit.
@@ -24,7 +25,9 @@ public class Bits {
     }
 
     /**
-     * Define com o valor zero o n-ésimo (zero-based) bit do inteiro.
+     * Define com o valor zero o n-ésimo (zero-based) bit do inteiro,
+     * contado do menos significativo (direita) para o mais significativo
+     * (esquerda).
      *
      * @param x O inteiro.
      * @param n O n-ésimo bit (zero-based).
@@ -36,7 +39,8 @@ public class Bits {
     }
 
     /**
-     * Define com o valor 1 o n-ésimo (zero-based) bit do inteiro.
+     * Define com o valor 1 o n-ésimo (zero-based) bit do inteiro, contado do
+     * menos significativo (direita) para o mais significativo (esquerda).
      *
      * @param x O inteiro.
      * @param n O n-ésimo bit (zero-based).
