@@ -11,5 +11,12 @@
 
     <artifactId>fabrica</artifactId>
 
+    <dependencies>
+        <dependency>
+            <groupId>com.github.kyriosdata.hdb</groupId>
+            <artifactId>system-api</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+    </dependencies>
 
 </project>

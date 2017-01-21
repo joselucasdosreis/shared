@@ -16,7 +16,7 @@ public class GetBytesTest {
 
     @Test
     public void padraoGetBytes() throws Exception {
-        for (int i = 0; i < 100_000; i++) {
+        for (int i = 0; i < 100; i++) {
             byte[] bytes = log.getBytes(StandardCharsets.UTF_8);
             getBytes.acrescenta(bytes, 0, bytes.length);
         }

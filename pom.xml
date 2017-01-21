@@ -23,7 +23,6 @@
         <module>startup</module>
         <module>config</module>
         <module>hdb-file</module>
-        <module>hdb-fabrica</module>
         <module>fabrica</module>
     </modules>
 

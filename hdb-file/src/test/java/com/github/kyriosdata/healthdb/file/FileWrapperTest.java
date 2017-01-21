@@ -26,7 +26,7 @@ public class FileWrapperTest {
         System.out.println("File: " + filename);
         System.out.println("Existe: " + exists(filename));
 
-        FileChannel f = FileChannel.open(path, StandardOpenOption.READ, StandardOpenOption.WRITE);
+        FileChannel f = FileChannel.open(path, StandardOpenOption.CREATE, StandardOpenOption.READ, StandardOpenOption.WRITE);
 
         for (int i = 0; i < 5; i++) {
             long pos = f.size();

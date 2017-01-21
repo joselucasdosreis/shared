@@ -7,7 +7,13 @@ import java.util.ServiceLoader;
  */
 public class Fabrica {
 
-    public static <T> T loadService(Class<T> api) {
+    /**
+     * Carrega o serviço do tipo fornecido.
+     * @param api
+     * @param <T>
+     * @return
+     */
+    public static <T> T newInstance(Class<T> api) {
 
         T result = null;
 
@@ -22,6 +28,5 @@ public class Fabrica {
                 "Cannot find implementation for: " + api);
 
         return result;
-
     }
 }
