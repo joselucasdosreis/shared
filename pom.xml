@@ -24,6 +24,7 @@
         <module>config</module>
         <module>hdb-file</module>
         <module>hdb-fabrica</module>
+        <module>fabrica</module>
     </modules>
 
     <name>com.github.kyriosdata.hdb:healthdb</name>
