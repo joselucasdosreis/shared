@@ -95,7 +95,7 @@ public class Logging implements Log, Runnable {
 
     /**
      * Cria uma instância do serviço de <i>logging</i>.
-     *
+     * <p>
      * <p>A configuração necessária é fornecida por meio do método
      * {@link #start(String)} e, dessa forma, o construtor default
      * pode ser empregado pela classe {@link java.util.ServiceLoader}.
@@ -166,6 +166,7 @@ public class Logging implements Log, Runnable {
     @Override
     public void start(String filename) {
         fm = new FileManager(filename);
+        agenda.setRemoveOnCancelPolicy(true);
         task = agenda.scheduleWithFixedDelay(this, 1000, 1000, TimeUnit.MILLISECONDS);
     }
 
@@ -173,12 +174,29 @@ public class Logging implements Log, Runnable {
      * Interrompe a execução do serviço de <i>logging</i>.
      * Eventos pendentes são registrados em meio secundário.
      */
+    @Override
     public void close() {
-       run();
-       task.cancel(false);
-       agenda = null;
-       task = null;
-       shared = null;
+
+        // Insere indicação de fim de operação
+        warn("shutting down logging service...");
+
+        // Oportunidade para registrar eventos ainda não tratados
+        run();
+
+        // Cancela a tarefa repetitiva
+        task.cancel(false);
+
+        // Aguarda pelo término
+        try {
+            task.wait();
+        } catch (Exception exp) {
+        }
+
+        // Libera para coleta (GC)
+        fm = null;
+        agenda = null;
+        task = null;
+        shared = null;
     }
 
     /**
@@ -190,7 +208,7 @@ public class Logging implements Log, Runnable {
      *
      * @param buffer Buffer para o qual bytes serão copiados.
      * @param bytes  Vetor de bytes a ser copiado.
-     * @param fim Última posição do vetor a ser considerada na cópia.
+     * @param fim    Última posição do vetor a ser considerada na cópia.
      */
     public void transferToBuffer(ByteBuffer buffer, byte[] bytes, int fim) {
         int resto = Buffers.copyToBuffer(buffer, bytes, 0, fim);

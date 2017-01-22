@@ -14,8 +14,6 @@ public class FabricaTest {
 
         log.info("testando apenas...");
 
-        try {
-            Thread.sleep(2000);
-        } catch (Exception exp) {}
+        log.close();
     }
 }

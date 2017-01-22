@@ -21,13 +21,26 @@ public interface Log {
      * Inicia o serviço de <i>logging</i>.
      *
      * @param filename O arquivo no qual registros serão depositados.
+     *
+     * @see #close()
      */
     void start(String filename);
+
+    /**
+     * Efetua o registro dos eventos ainda não tratados e
+     * interrompe a execução do serviço de <i>logging</i>.
+     *
+     * @see #start(String)
+     */
+    void close();
 
     /**
      * Registra mensagem de log (informativa).
      *
      * @param msg Mensagem a ser registrada.
+     *
+     * @see #warn(String)
+     * @see #fail(String)
      */
     void info(String msg);
 
@@ -38,6 +51,9 @@ public interface Log {
      * indesejável.
      *
      * @param msg Mensagem a ser registrada.
+     *
+     * @see #info(String)
+     * @see #fail(String)
      */
     void warn(String msg);
 
@@ -46,6 +62,9 @@ public interface Log {
      * situação indesejável.
      *
      * @param msg Mensagem a ser registrada.
+     *
+     * @see #info(String)
+     * @see #warn(String)
      */
     void fail(String msg);
 }
