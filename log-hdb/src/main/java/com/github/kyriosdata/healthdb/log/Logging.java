@@ -115,6 +115,7 @@ public class Logging implements Log, Runnable {
      */
     @Override
     public void start(String filename) {
+         fm = new FileManager(filename);
         agenda.scheduleWithFixedDelay(this, 1000, 1000, TimeUnit.MILLISECONDS);
     }
 
