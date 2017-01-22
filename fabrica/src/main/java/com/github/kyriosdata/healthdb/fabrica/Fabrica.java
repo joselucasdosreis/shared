@@ -3,7 +3,14 @@ package com.github.kyriosdata.healthdb.fabrica;
 import java.util.ServiceLoader;
 
 /**
- * Fábrica de objetos.
+ * Fábrica de objetos que são "pontos de extensão".
+ *
+ * <p>A presente classe é recomendada para permitir a criação de
+ * instâncias a partir de classes "desconhecidas". Por exemplo,
+ * um classe que implementa uma determinada interface, mas que
+ * é fornecida em arquivo .jar específico, desconhecido em
+ * tempo de compilação ou cuja dependência para a classe que
+ * implementa a interface não deve existir.
  */
 public class Fabrica {
 
