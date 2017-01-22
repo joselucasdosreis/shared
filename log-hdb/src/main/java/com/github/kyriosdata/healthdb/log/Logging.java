@@ -43,9 +43,9 @@ public class Logging implements Log, Runnable {
      * de cada nível.
      */
     private byte[][] level = {
-            { 32, 73, 78, 70, 79, 32 },
-            { 32, 87, 65, 82, 78, 32 },
-            { 32, 70, 65, 73, 76, 32 } };
+            {32, 73, 78, 70, 79, 32},
+            {32, 87, 65, 82, 78, 32},
+            {32, 70, 65, 73, 76, 32}};
 
     // Cache Level 1
     private LogEvent[] eventos = new LogEvent[EVENTS_SIZE];
@@ -54,7 +54,7 @@ public class Logging implements Log, Runnable {
     private ByteBuffer buffer = ByteBuffer.allocate(BUFFER_SIZE);
 
     // Vetor de bytes correspondente ao caractere de "nova linha"
-    private final byte[] NEWLINE = { 10 };
+    private final byte[] NEWLINE = {10};
 
     private RingBuffer shared;
 
@@ -78,7 +78,7 @@ public class Logging implements Log, Runnable {
              * sequência, a parte restante do evento é depositada
              * no buffer já liberado.
              *
-             * <p>Adicionalmente às observações acima, o "flush" em
+             * <p>Adicionalmente às observações acima, o "descarrega" em
              * disco é evitado enquanto há espaço no buffer e ocorre
              * quando o elemento consumido é o último (flag true).
              *
@@ -91,18 +91,22 @@ public class Logging implements Log, Runnable {
 
                 // Instante (24 bytes)
                 byte[] timestamp = fmt.toBytes(eventos[v].instante);
-                transferToBuffer(buffer, timestamp, timestamp.length - 1, false);
+                transferToBuffer(buffer, timestamp, timestamp.length - 1);
 
                 // Nível (" INFO ", " WARN " ou " FAIL ") (6 bytes)
-                transferToBuffer(buffer, level[eventos[v].level], level[eventos[v].level].length - 1, false);
+                transferToBuffer(buffer, level[eventos[v].level], level[eventos[v].level].length - 1);
 
                 // Payload (tamanho variável)
                 // TODO substituir getBytes por char[], wrap, CharsetEncoder.
                 byte[] bytes = eventos[v].payload.getBytes(StandardCharsets.UTF_8);
-                transferToBuffer(buffer, bytes, bytes.length - 1, false);
+                transferToBuffer(buffer, bytes, bytes.length - 1);
 
                 // Newline
-                transferToBuffer(buffer, NEWLINE, NEWLINE.length - 1, ultimo);
+                transferToBuffer(buffer, NEWLINE, NEWLINE.length - 1);
+
+                if (ultimo) {
+                    descarrega(buffer);
+                }
             }
         };
     }
@@ -115,44 +119,38 @@ public class Logging implements Log, Runnable {
      */
     @Override
     public void start(String filename) {
-         fm = new FileManager(filename);
+        fm = new FileManager(filename);
         agenda.scheduleWithFixedDelay(this, 1000, 1000, TimeUnit.MILLISECONDS);
     }
 
     /**
      * Transfere para o buffer o conteúdo do vetor de bytes, desde o
      * primeiro byte do vetor até a posição final. Se durante a
-     * cópia o buffer enche, então um "flush" é realizado. O "flush"
+     * cópia o buffer enche, então um "descarrega" é realizado. O "descarrega"
      * é realizado mesmo que o buffer não esteja cheio, mas pela
      * indicação do argumento.
      *
      * @param buffer Buffer para o qual bytes serão copiados.
-     * @param bytes Vetor de bytes a ser copiado.
-     * @param fim
-     * @param flush Indica que flush do buffer deve ser realizado, mesmo
- *              que não esteja cheio.
+     * @param bytes  Vetor de bytes a ser copiado.
+     * @param fim Última posição do vetor a ser considerada na cópia.
      */
-    public void transferToBuffer(ByteBuffer buffer, byte[] bytes, int fim, boolean flush) {
+    public void transferToBuffer(ByteBuffer buffer, byte[] bytes, int fim) {
         int resto = Buffers.copyToBuffer(buffer, bytes, 0, fim);
         while (resto != 0) {
 
             // Buffer cheio
-            flush(buffer);
+            descarrega(buffer);
 
             resto = Buffers.copyToBuffer(buffer, bytes, fim - resto + 1, fim);
-        }
-
-        if (flush) {
-            flush(buffer);
         }
     }
 
     /**
      * Descarrega o conteúdo do buffer.
      *
-     * @param buffer Buffer cujo conteúdo deve ser descarregado.
+     * @param buffer Buffer cujo conteúdo deve ser persistido.
      */
-    public void flush(ByteBuffer buffer) {
+    public void descarrega(ByteBuffer buffer) {
         buffer.flip();
 
         fm.acrescenta(buffer);

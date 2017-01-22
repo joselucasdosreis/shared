@@ -187,6 +187,11 @@ public class RingBuffer {
         working.set(0);
     }
 
+    /**
+     * Consome eventuais elementos na fila.
+     * Apenas o último dos elementos prontos para consumo
+     * recebe o valor "true" como argumento.
+     */
     private void realFlush() {
 
         while (true) {

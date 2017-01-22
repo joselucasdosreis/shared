@@ -1,6 +1,5 @@
 package com.github.kyriosdata.healthdb.log;
 
-import com.github.kyriosdata.healthdb.api.Log;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
@@ -8,27 +7,28 @@ import org.junit.jupiter.api.Test;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class LoggingTest {
 
     private String dir = getClass().getResource(".").getFile();
+    private String file = dir + "teste.log";
 
     private ScheduledThreadPoolExecutor agenda = new ScheduledThreadPoolExecutor(2);
 
     @Test
     public void cicloDeVida() {
-        Log log = new Logging();
-        log.start(dir + "teste.log");
+        Logging log = new Logging();
+        log.start(file);
+        log.info("uma mensagem qualquer 4");
+        log.run();
     }
 
     @Test
     public void singleLog() {
         Logging log = new Logging();
-
-        agenda.scheduleWithFixedDelay(log, 1000, 1000, TimeUnit.MILLISECONDS);
+        log.start(file);
 
         log.info("info");
         log.warn("warn");
@@ -40,8 +40,7 @@ public class LoggingTest {
     @Test
     public void log4h() {
         Logging log = new Logging();
-
-        agenda.scheduleWithFixedDelay(log, 1000, 1000, TimeUnit.MILLISECONDS);
+        log.start(file);
 
         String msg = "ThreadName: " + Thread.currentThread().getName();
 
@@ -56,10 +55,13 @@ public class LoggingTest {
 
     @Test
     public void log4j() {
+        System.setProperty("async.log", dir + "async.log");
         Logger logger = LogManager.getLogger(this.getClass());
+        String msg = "ThreadName: " + Thread.currentThread().getName();
+
         geraLogsEmVariasThreads(() -> {
             for (int i = 0; i < 3_600; i++) {
-                logger.info("I: " + i + " ThreadName: " + Thread.currentThread().getName());
+                logger.info(msg);
             }
         });
     }
@@ -104,8 +106,8 @@ public class LoggingTest {
 
         ByteBuffer buffer = ByteBuffer.allocate(10);
 
-        log.transferToBuffer(buffer, saude, saude.length - 1, false);
-        log.transferToBuffer(buffer, vida, vida.length - 1, true);
+        log.transferToBuffer(buffer, saude, saude.length - 1);
+        log.transferToBuffer(buffer, vida, vida.length - 1);
 
         assertEquals("saúdevida", new String(buffer.array()));
     }

@@ -23,6 +23,7 @@ public class Buffers {
      *               bytes serão copiados.
      *
      * @param fim Posição final no vetor do último byte a ser copiado.
+     *
      * @return 0 se todos os bytes foram copiados ou a quantidade
      * de bytes restantes no vetor de bytes que não foram copiados.
      * Um valor diferente de zero indica que a capacidade do buffer
