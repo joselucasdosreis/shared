@@ -12,11 +12,25 @@
     <artifactId>fabrica</artifactId>
 
     <dependencies>
+
+        <!-- APENAS PARA TESTE (compile time)    -->
+        <!-- Interface cuja instância é desejada -->
         <dependency>
             <groupId>com.github.kyriosdata.hdb</groupId>
-            <artifactId>system-api</artifactId>
+            <artifactId>log-api</artifactId>
             <version>1.0.0</version>
         </dependency>
+
+        <!-- APENAS PARA TESTE (runtime)         -->
+        <!-- Conhecido apenas durante a execução -->
+
+        <dependency>
+            <groupId>com.github.kyriosdata.hdb</groupId>
+            <artifactId>log-hdb</artifactId>
+            <version>1.0.0</version>
+            <scope>runtime</scope>
+        </dependency>
+
     </dependencies>
 
 </project>

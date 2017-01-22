@@ -11,6 +11,8 @@ import com.github.kyriosdata.healthdb.concurrency.RingBuffer;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Implementação de serviço de logging.
@@ -20,6 +22,8 @@ public class Logging implements Log, Runnable {
     private FileManager fm = new FileManager("/Users/kyriosdata/tmp/localhost.log");
     private final int BUFFER_SIZE = 64 * 1024;
     private final int EVENTS_SIZE = 1024;
+
+    private ScheduledThreadPoolExecutor agenda = new ScheduledThreadPoolExecutor(1);
 
     /**
      * Constante que indica nível INFO (informação).
@@ -101,6 +105,17 @@ public class Logging implements Log, Runnable {
                 transferToBuffer(buffer, NEWLINE, NEWLINE.length - 1, ultimo);
             }
         };
+    }
+
+    /**
+     * Inicia o serviço de <i>logging</i>.
+     *
+     * @param filename O arquivo a ser empregado para registro das
+     *                 informações.
+     */
+    @Override
+    public void start(String filename) {
+        agenda.scheduleWithFixedDelay(this, 1000, 1000, TimeUnit.MILLISECONDS);
     }
 
     /**

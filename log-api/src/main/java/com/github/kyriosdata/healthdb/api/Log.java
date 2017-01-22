@@ -13,6 +13,14 @@ package com.github.kyriosdata.healthdb.api;
  *     http://softwareengineering.stackexchange.com/questions/246620/in-java-what-are-some-good-ways-to-separate-apis-from-implementation-of-entire
  */
 public interface Log {
+
+    /**
+     * Inicia o serviço de <i>logging</i>.
+     *
+     * @param filename O arquivo no qual registros serão depositados.
+     */
+    void start(String filename);
+
     /**
      * Registra mensagem de log (informativa).
      *
