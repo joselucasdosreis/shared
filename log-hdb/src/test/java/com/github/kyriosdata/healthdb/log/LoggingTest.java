@@ -1,5 +1,6 @@
 package com.github.kyriosdata.healthdb.log;
 
+import com.github.kyriosdata.healthdb.api.Log;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
@@ -13,7 +14,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class LoggingTest {
 
+    private String dir = getClass().getResource(".").getFile();
+
     private ScheduledThreadPoolExecutor agenda = new ScheduledThreadPoolExecutor(2);
+
+    @Test
+    public void cicloDeVida() {
+        Log log = new Logging();
+        log.start(dir + "teste.log");
+    }
 
     @Test
     public void singleLog() {
@@ -21,7 +30,9 @@ public class LoggingTest {
 
         agenda.scheduleWithFixedDelay(log, 1000, 1000, TimeUnit.MILLISECONDS);
 
-        log.fail("ThreadName: " + Thread.currentThread().getName());
+        log.info("info");
+        log.warn("warn");
+        log.fail("fail");
 
         log.run();
     }
