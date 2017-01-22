@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -15,12 +14,11 @@ public class LoggingTest {
     private String dir = getClass().getResource(".").getFile();
     private String file = dir + "teste.log";
 
-    private ScheduledThreadPoolExecutor agenda = new ScheduledThreadPoolExecutor(2);
-
     @Test
     public void cicloDeVida() {
         Logging log = new Logging();
         log.start(file);
+
         log.info("uma mensagem qualquer 4");
         log.run();
     }
@@ -57,6 +55,7 @@ public class LoggingTest {
     public void log4j() {
         System.setProperty("async.log", dir + "async.log");
         Logger logger = LogManager.getLogger(this.getClass());
+
         String msg = "ThreadName: " + Thread.currentThread().getName();
 
         geraLogsEmVariasThreads(() -> {
@@ -77,14 +76,10 @@ public class LoggingTest {
             threads[i] = new Thread(tarefa);
         }
 
-        System.out.println("Threads criadas.");
-
         // INICIA
         for (int i = 0; i < TOTAL_THREADS; i++) {
             threads[i].start();
         }
-
-        System.out.println("Threads iniciadas.");
 
         try {
             for (int i = 0; i < TOTAL_THREADS; i++) {
@@ -93,8 +88,6 @@ public class LoggingTest {
         } catch (Exception exp) {
             System.out.println(exp.toString());
         }
-
-        System.out.println("Threads concluídas.");
     }
 
     @Test

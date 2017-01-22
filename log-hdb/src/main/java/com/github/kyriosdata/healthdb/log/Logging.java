@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2016 Fábio Nogueira de Lucena
+ *
  * Fábrica de Software - Instituto de Informática (UFG)
  * Creative Commons Attribution 4.0 International License.
  */
@@ -19,8 +20,23 @@ import java.util.concurrent.TimeUnit;
  */
 public class Logging implements Log, Runnable {
 
-    private FileManager fm = new FileManager("/Users/kyriosdata/tmp/localhost.log");
+    /**
+     * Arquivo no qual os registros serão depositados.
+     */
+    private FileManager fm;
+
+    /**
+     * Tamanho máximo do buffer de log. Ou seja,
+     * quantidade máxima de informação, em número de bytes,
+     * registradas no buffer e ainda não resistradas em
+     * meio secundário.
+     */
     private final int BUFFER_SIZE = 64 * 1024;
+
+    /**
+     * Quantidade máxima de eventos registrados e
+     * ainda não transferidos para o buffer.
+     */
     private final int EVENTS_SIZE = 1024;
 
     private ScheduledThreadPoolExecutor agenda = new ScheduledThreadPoolExecutor(1);
@@ -35,6 +51,11 @@ public class Logging implements Log, Runnable {
      * Situação não necessariamente indesejável.
      */
     private final int WARN = 1;
+
+    /**
+     * Constante que indica nível FAIL (falha).
+     * Necessariamente é uma situação indesejável.
+     */
     private final int FAIL = 2;
 
     /**
@@ -56,9 +77,24 @@ public class Logging implements Log, Runnable {
     // Vetor de bytes correspondente ao caractere de "nova linha"
     private final byte[] NEWLINE = {10};
 
+    // Estrutura circular que controle acesso entre produtor e consumidor.
+    // Produtor é quem usa o log para registro de informações relevantes e
+    // consumidor é responsável por persistir essa informação em meio
+    // secundário.
     private RingBuffer shared;
 
+    /**
+     * Cria uma instância do serviço de <i>logging</i>.
+     *
+     * <p>A configuração necessária é fornecida por meio do método
+     * {@link #start(String)} e, dessa forma, o construtor default
+     * pode ser empregado pela classe {@link java.util.ServiceLoader}.
+     */
     public Logging() {
+
+        // Cria previamente todos os eventos que
+        // serão reutilizados (evita ação do GC)
+
         for (int i = 0; i < EVENTS_SIZE; i++) {
             eventos[i] = new LogEvent();
         }
