@@ -36,6 +36,16 @@ public interface ArquivoManager {
     boolean existe(String filename);
 
     /**
+     * Cria o arquivo.
+     *
+     * @param filename O nome do arquivo a ser criado.
+     *
+     * @return {@code true} se o arquivo já existe ou foi
+     * criado pela operação, caso contrário, retorna {@code false}.
+     */
+    boolean cria(String filename);
+
+    /**
      * Remove o arquivo, caso exista.
      *
      * @param filename O nome do arquivo.
@@ -46,4 +56,13 @@ public interface ArquivoManager {
      * tentativa de removê-lo.
      */
     boolean remove(String filename);
+
+    /**
+     * Prepara o objeto para uso.
+     *
+     * @param params Parâmetros que configuram o objeto.
+     *               Esse método deve ser chamado antes que
+     *               qualquer serviço oferecido seja executado.
+     */
+    void start(Object[] params);
 }

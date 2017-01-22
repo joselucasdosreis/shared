@@ -51,11 +51,9 @@ public interface Arquivo {
      * @param posicao Posição inicial do arquivo a partir da qual bytes
      *                serão lidos.
      *
-     * @param total Total de bytes a serem lidos e depositados no buffer.
-     *
-     * @see #carrega(byte[], int, int)
+     * @see #carrega(byte[], int)
      */
-    void carrega(ByteBuffer buffer, int posicao, int total);
+    void carrega(ByteBuffer buffer, int posicao);
 
     /**
      * Obtém do arquivo o total de bytes, a partir de determinada posição, e
@@ -70,11 +68,9 @@ public interface Arquivo {
      * @param posicao Posição inicial no arquivo a partir da qual bytes serão
      *                lidos.
      *
-     * @param total Total de bytes a serem lidos.
-     *
-     * @see #carrega(ByteBuffer, int, int)
+     * @see #carrega(ByteBuffer, int)
      */
-    void carrega(byte[] buffer, int posicao, int total);
+    void carrega(byte[] buffer, int posicao);
 
     /**
      * Deposita no arquivo, a partir da posição indicada, o total de
@@ -86,11 +82,9 @@ public interface Arquivo {
      * @param posicao Posição inicial no arquivo a partir da qual
      *                bytes serão escritos.
      *
-     * @param total Total de bytes escritos.
-     *
-     * @see #escreve(byte[], int, int)
+     * @see #escreve(byte[], int)
      */
-    void escreve(ByteBuffer buffer, int posicao, int total);
+    void escreve(ByteBuffer buffer, int posicao);
 
     /**
      * Deposita no arquivo, a partir da posição indicada, o total de
@@ -102,9 +96,7 @@ public interface Arquivo {
      * @param posicao Posição inicial no arquivo a partir da qual
      *                bytes serão escritos.
      *
-     * @param total Total de bytes escritos.
-     *
-     * @see #escreve(ByteBuffer, int, int)
+     * @see #escreve(ByteBuffer, int)
      */
-    void escreve(byte[] buffer, int posicao, int total);
+    void escreve(byte[] buffer, int posicao);
 }
