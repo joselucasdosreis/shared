@@ -64,4 +64,11 @@ public class ConfiguracaoTest {
         assertEquals("80", c.valor("port"));
         assertEquals("inf.ufg.br", c.valor("server"));
     }
+
+    @Test
+    public void propriedadeSobrescrita() {
+        Configuracao c = new Configuracao("tipico.cfg");
+        assertNotEquals("ok", c.valor("original"));
+        assertEquals("sobrescrito", c.valor("original"));
+    }
 }

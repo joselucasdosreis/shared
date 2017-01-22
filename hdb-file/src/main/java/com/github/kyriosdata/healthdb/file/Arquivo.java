@@ -7,17 +7,20 @@ import java.nio.ByteBuffer;
  * armazenada em meio secundário, juntamente com operações
  * pertinentes.
  *
- * <p>As operações são baseadas na perspectiva do Cliente,
- * código que faz uso dessa interface, sem referência explícita
- * ou dependência do real meio empregado para armazenar ou
- * consultar as informações requisitadas.
+ * <p>As operações são baseadas na perspectiva do Cliente
+ * (código que faz uso dessa interface), sem referência explícita
+ * ou dependência para o real meio empregado para armazenar ou
+ * consultar tais sequências de bytes.
  */
 public interface Arquivo {
 
     /**
-     * Acrescenta o conteúdo do buffer ao final do arquivo.
+     * Acrescenta o conteúdo do buffer, desde o primeiro byte
+     * até o último, ao final do arquivo.
      *
      * @param buffer Buffer cujo conteúdo será acrescido ao arquivo.
+     *
+     * @see #acrescenta(byte[], int, int)
      */
     void acrescenta(ByteBuffer buffer);
 
@@ -31,6 +34,8 @@ public interface Arquivo {
      *
      * @param total Total de bytes a serem inseridos no arquivo, a partir da
      *              posição indicada, ao final do arquivo.
+     *
+     * @see #acrescenta(ByteBuffer)
      */
     void acrescenta(byte[] buffer, int i, int total);
 
@@ -38,18 +43,26 @@ public interface Arquivo {
      * Obtém do arquivo, a partir de determinada posição, um total de bytes
      * a ser depositado no buffer.
      *
+     * <p>Espera-se que o buffer possua espaço suficiente para
+     * carregar o total de bytes a ser carregado.
+     *
      * @param buffer Buffer onde bytes lidos serão depositados.
      *
      * @param posicao Posição inicial do arquivo a partir da qual bytes
      *                serão lidos.
      *
      * @param total Total de bytes a serem lidos e depositados no buffer.
+     *
+     * @see #carrega(byte[], int, int)
      */
     void carrega(ByteBuffer buffer, int posicao, int total);
 
     /**
      * Obtém do arquivo o total de bytes, a partir de determinada posição, e
      * os deposita em um buffer.
+     *
+     * <p>Espera-se que o buffer possua espaço suficiente para
+     * carregar o total de bytes a ser carregado.
      *
      * @param buffer Vetor de bytes no qual o conteúdo lido do arquivo será
      *               depositado.
@@ -58,6 +71,8 @@ public interface Arquivo {
      *                lidos.
      *
      * @param total Total de bytes a serem lidos.
+     *
+     * @see #carrega(ByteBuffer, int, int)
      */
     void carrega(byte[] buffer, int posicao, int total);
 
@@ -79,7 +94,7 @@ public interface Arquivo {
 
     /**
      * Deposita no arquivo, a partir da posição indicada, o total de
-     * bytes, obtidos a partir da primeira posição do buffer.
+     * bytes do buffer, obtidos a partir da primeira posição do buffer.
      *
      * @param buffer Buffer do qual bytes serão consultados para a
      *               inserção no arquivo.

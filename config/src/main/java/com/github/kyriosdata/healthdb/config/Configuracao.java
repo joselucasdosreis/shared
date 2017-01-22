@@ -1,6 +1,9 @@
 /*
- * Copyright (c) 2016 Fábio Nogueira de Lucena
+ * Copyright (c) 2016
+ *
+ * Fábio Nogueira de Lucena
  * Fábrica de Software - Instituto de Informática (UFG)
+ *
  * Creative Commons Attribution 4.0 International License.
  */
 
@@ -20,7 +23,7 @@ import java.util.*;
  * de criação de uma instância dessa classs.
  *
  * <p>Valores de uma configuração não podem ser alterados,
- * são <i>read only</i>.
+ * são apenas para leitura (<i>read only</i>).
  *
  * <p>Propriedades são pares definidos por uma chave separada do valor
  * pelo símbolo '='. Por exemplo, <code>port=80</code> defina a

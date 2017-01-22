@@ -30,9 +30,9 @@ public class StartUp {
     /**
      * FASE 0 - Serviços oferecidos pelo StartUp
      * Get tempo corrente -> inicio
+     * Get configuração (por exemplo, onde persistir logging, dentre outras).
      * Start logging
      * Log início
-     * Get configuração
      * Log configuração
      *
      * FASE 1

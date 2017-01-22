@@ -10,9 +10,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
-/**
- * Created by kyriosdata on 1/21/17.
- */
 public class FileWrapperTest {
 
     private String dir = getClass().getResource(".").getFile();

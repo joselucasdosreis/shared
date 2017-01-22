@@ -21,8 +21,6 @@ public class LoggingTest {
 
         log.info("uma mensagem qualquer 4");
         log.close();
-
-        System.out.println("ok");
     }
 
     @Test
