@@ -2,6 +2,7 @@ package com.github.kyriosdata.healthdb.log;
 
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.CharsetEncoder;
@@ -13,6 +14,9 @@ public class GetBytesTest {
     FileManager fencoder = new FileManager("encoder.log");
 
     private final String log = "linha fixa\n";
+
+    public GetBytesTest() throws IOException {
+    }
 
     @Test
     public void padraoGetBytes() throws Exception {

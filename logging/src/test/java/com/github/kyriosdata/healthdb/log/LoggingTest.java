@@ -15,7 +15,7 @@ public class LoggingTest {
     private String file = dir + "teste.log";
 
     @Test
-    public void cicloDeVida() {
+    public void cicloDeVida() throws Exception {
         Logging log = new Logging();
         log.start(file);
 
@@ -24,7 +24,7 @@ public class LoggingTest {
     }
 
     @Test
-    public void singleLog() {
+    public void singleLog() throws Exception {
         Logging log = new Logging();
         log.start(file);
 
@@ -36,7 +36,7 @@ public class LoggingTest {
     }
 
     @Test
-    public void log4h() {
+    public void log4h() throws Exception {
         Logging log = new Logging();
         log.start(file);
 

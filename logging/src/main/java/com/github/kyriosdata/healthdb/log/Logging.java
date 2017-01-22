@@ -12,6 +12,7 @@ package com.github.kyriosdata.healthdb.log;
 import com.github.kyriosdata.healthdb.api.Log;
 import com.github.kyriosdata.healthdb.concurrency.RingBuffer;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ScheduledFuture;
@@ -164,7 +165,7 @@ public class Logging implements Log, Runnable {
      *                 informações.
      */
     @Override
-    public void start(String filename) {
+    public void start(String filename) throws IOException {
         fm = new FileManager(filename);
         agenda.setRemoveOnCancelPolicy(true);
         task = agenda.scheduleWithFixedDelay(this, 1000, 1000, TimeUnit.MILLISECONDS);
@@ -191,6 +192,9 @@ public class Logging implements Log, Runnable {
             task.wait();
         } catch (Exception exp) {
         }
+
+        // Fecha arquivo empregado para registro
+        fm.close();
 
         // Libera para coleta (GC)
         fm = null;

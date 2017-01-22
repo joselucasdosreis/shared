@@ -9,6 +9,8 @@
 
 package com.github.kyriosdata.healthdb.api;
 
+import java.io.IOException;
+
 /**
  * Definição de serviços de <i>logging</i>.
  *
@@ -24,7 +26,7 @@ public interface Log {
      *
      * @see #close()
      */
-    void start(String filename);
+    void start(String filename) throws IOException;
 
     /**
      * Efetua o registro dos eventos ainda não tratados e

@@ -1,6 +1,9 @@
 /*
- * Copyright (c) 2016 Fábio Nogueira de Lucena
+ * Copyright (c) 2016
+ *
+ * Fábio Nogueira de Lucena
  * Fábrica de Software - Instituto de Informática (UFG)
+ *
  * Creative Commons Attribution 4.0 International License.
  */
 
@@ -10,74 +13,49 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.Files;
-import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashSet;
-import java.util.Set;
-
-import static java.nio.file.StandardOpenOption.APPEND;
-import static java.nio.file.StandardOpenOption.CREATE;
+import java.nio.file.StandardOpenOption;
 
 /**
  * Serviços de manipulação de arquivo.
  */
 public class FileManager {
 
-    private static final Set<OpenOption> appendOptions;
-
-    static {
-        appendOptions = new HashSet<>();
-        appendOptions.add(APPEND);
-        appendOptions.add(CREATE);
-    }
-
     private final Path path;
+    private final SeekableByteChannel channel;
 
     /**
      * Cria instância que oferece acesso a serviços sobre arquivos.
      * @param filename
      */
-    public FileManager(String filename) {
+    public FileManager(String filename) throws IOException {
        path = Paths.get(filename);
+       channel = Files.newByteChannel(path, StandardOpenOption.APPEND, StandardOpenOption.CREATE);
     }
 
     public void acrescenta(byte[] payload, int i, int size) throws Exception {
         ByteBuffer buffer = ByteBuffer.wrap(payload, i, size);
 
-        acrescenta(path, buffer);
+        acrescenta(buffer);
     }
 
-    /**
-     * Acrescenta o conteúdo do buffer ao arquivo.
-     * @param buffer
-     */
     public void acrescenta(ByteBuffer buffer) {
-        acrescenta(path, buffer);
-    }
 
-    /**
-     * Acrescenta, ao final do arquivo indicado, o conteúdo disponível no
-     * buffer.
-     *
-     * @param path Arquivo no qual será feita a inserção.
-     *
-     * @param buffer Conteúdo a ser inserido.
-     */
-    public static void acrescenta(Path path, ByteBuffer buffer) {
-
-        try (SeekableByteChannel seekableByteChannel = (Files.newByteChannel(path,
-                appendOptions))) {
-
-            //append some text at the end
-            seekableByteChannel.position(seekableByteChannel.size());
+        try {
 
             while (buffer.hasRemaining()) {
-                seekableByteChannel.write(buffer);
+                channel.write(buffer);
             }
 
         } catch (IOException ex) {
             System.err.println(ex);
         }
+    }
+
+    public void close() {
+        try {
+            channel.close();
+        } catch (Exception exp) {}
     }
 }
