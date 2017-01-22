@@ -15,7 +15,7 @@
 
     <modules>
         <module>log-api</module>
-        <module>log-hdb</module>
+        <module>logging</module>
         <module>task</module>
         <module>ringbuffer</module>
         <module>system-api</module>
