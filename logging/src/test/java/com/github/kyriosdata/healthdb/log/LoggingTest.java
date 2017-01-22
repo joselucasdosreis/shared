@@ -20,7 +20,7 @@ public class LoggingTest {
         log.start(file);
 
         log.info("uma mensagem qualquer 4");
-        log.run();
+        log.close();
     }
 
     @Test
@@ -32,7 +32,7 @@ public class LoggingTest {
         log.warn("warn");
         log.fail("fail");
 
-        log.run();
+        log.close();
     }
 
     @Test
@@ -48,7 +48,7 @@ public class LoggingTest {
             }
         });
 
-        log.run();
+        log.close();
     }
 
     @Test
