@@ -20,9 +20,12 @@ public interface Arquivo {
      *
      * @param buffer Buffer cujo conteúdo será acrescido ao arquivo.
      *
+     * @return A posição no arquivo a partir da qual o buffer será
+     * inserido.
+     *
      * @see #acrescenta(byte[], int, int)
      */
-    void acrescenta(ByteBuffer buffer);
+    int acrescenta(ByteBuffer buffer);
 
     /**
      * Acrescenta o total de bytes do buffer, a partir da posição
@@ -35,9 +38,12 @@ public interface Arquivo {
      * @param total Total de bytes a serem inseridos no arquivo, a partir da
      *              posição indicada, ao final do arquivo.
      *
+     * @return A posição no arquivo a partir da qual o buffer será
+     * inserido.
+     *
      * @see #acrescenta(ByteBuffer)
      */
-    void acrescenta(byte[] buffer, int i, int total);
+    int acrescenta(byte[] buffer, int i, int total);
 
     /**
      * Obtém do arquivo, a partir de determinada posição, um total de bytes

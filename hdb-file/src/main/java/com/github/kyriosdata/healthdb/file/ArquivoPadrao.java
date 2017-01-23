@@ -31,14 +31,22 @@ public class ArquivoPadrao implements Arquivo, Closeable {
      * buffer.
      *
      * @param buffer Conteúdo a ser inserido.
-     */
+     *
+     * @return A posição no arquivo a partir da qual o buffer será
+     * inserido.
+     *
+     * */
     @Override
-    public void acrescenta(ByteBuffer buffer) {
+    public int acrescenta(ByteBuffer buffer) {
+
+        long posicao;
 
         try {
 
+            posicao = channel.size();
+
             // Posição corrente é o final do arquivo.
-            channel.position(channel.size());
+            channel.position(posicao);
 
             buffer.flip();
 
@@ -47,14 +55,16 @@ public class ArquivoPadrao implements Arquivo, Closeable {
             }
 
         } catch (IOException ex) {
-            System.err.println(ex);
+            posicao = -1;
         }
+
+        return (int) posicao;
     }
 
     @Override
-    public void acrescenta(byte[] buffer, int i, int total) {
+    public int acrescenta(byte[] buffer, int i, int total) {
 
-        acrescenta(ByteBuffer.wrap(buffer, i, total));
+        return acrescenta(ByteBuffer.wrap(buffer, i, total));
     }
 
     @Override
