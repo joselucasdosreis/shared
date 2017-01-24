@@ -3,15 +3,29 @@ package com.github.kyriosdata.hdb.object;
 /**
  * Mantém informações sobre as classes
  * do Modelo de Referência do openEHR.
- * <p>
- * <p>Cada classe é definida por uma sequência de campos.
+ *
+ * <p>Cada classe é definida por uma sequência bem definida de
+ * campos. Cada um deles com o seu identificador (nome), tipo e
+ * deslocamento em número de bytes a partir do início do registro.
+ *
+ * <p>O deslocamento está definido para todos os tipos "primitivos"
+ * e para o primeiro campo de tamanho variável. Nos demais casos o
+ * valor indicado é -1. Nesse contexto, indica que o deslocamento
+ * só pode ser obtido por meio do <i>header</i> do registro.
+ *
  */
-public class RecordManager {
+public class ClasseManager {
 
+    /**
+     * Constante que identifica objeto da classe DV_IDENTIFIER.
+     */
     private static int OE_DVIDENTIFIER = 0;
 
-    private static Campo fields;
-
+    /**
+     * Cada classe do Modelo de Referência do openEHR possui
+     * uma entrada correspondente nesse atributo, em conformidade
+     * com a ordem estabelecida pelos valores das constantes acima.
+     */
     private static final Campo[][] classes = {
 
             // OE_DVIDENTIFIER
