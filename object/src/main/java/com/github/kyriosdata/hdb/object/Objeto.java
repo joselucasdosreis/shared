@@ -22,18 +22,12 @@ public class Objeto {
     int dados = 0;
 
     /**
-     * Limite do buffer
-     */
-    int limite = 2048;
-
-    /**
      * Consome informações básicas do objeto, como o tipo,
      * por exemplo. Exige carga do bloco correspondente.
      */
     public void start() {
         header = 0;
         dados = 30;
-        limite = 2048;
     }
 
     /**
@@ -61,5 +55,31 @@ public class Objeto {
         int offset = ClasseManager.offset(tipo, ordem);
 
         return "ok";
+    }
+
+    public int fragmentado(int offset, int size) {
+        int restantes = restantes(dados, offset);
+        return restantes >= size ? 0 :
+    }
+
+    /**
+     * Retorna a quantidade de bytes existente no buffer a
+     * partir da posição inicial dos dados de um objeto e
+     * com um determinado deslocamento.
+     *
+     * @param d Posição inicial dos dados relativa ao buffer.
+     *          Essa é a posição de referência. Se é o início do
+     *          buffer, então o valor é zero. Pode ser um valor
+     *          entre 0 e {@link Constantes#BUFFER_SIZE},
+     *          inclusive.
+     *
+     * @param o Deslocamento do byte de interesse relativa à
+     *          posição inicial (parâmetro {@code d}).
+     *
+     * @return Quantidade de bytes existente no buffer a partir
+     * da posição inicial d com o deslocamento o.
+     */
+    public int restantes(int d, int o) {
+        return Constantes.BUFFER_SIZE - o - d + 1;
     }
 }

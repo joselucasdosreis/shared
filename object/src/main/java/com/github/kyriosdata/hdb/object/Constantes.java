@@ -1,7 +1,7 @@
 package com.github.kyriosdata.hdb.object;
 
 /**
- * Created by kyriosdata on 1/24/17.
+ * Constantes empregadas por vários componentes.
  */
 public class Constantes {
 
@@ -10,4 +10,9 @@ public class Constantes {
      * está definido, ou é desconhecido.
      */
     public static final int INDEFINIDO = -1;
+
+    /**
+     * Valor padrão do tamanho de um buffer.
+     */
+    public static final int BUFFER_SIZE = 4096;
 }
