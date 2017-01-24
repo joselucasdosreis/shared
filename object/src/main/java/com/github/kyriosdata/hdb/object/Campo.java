@@ -22,15 +22,46 @@ public class Campo {
     public static int REAL = 0;
     public static int DOUBLE = 0;
 
+    public static int TRUE = 0;
+    public static int FALSE = 0;
+
+    /**
+     * lower (INT),
+     * upper (INT),
+     * lowerIncluded (BOOLEAN),
+     * upperIncluded (BOOLEAN)
+     */
     public static int INTERVAL_INT = 0;
+
+    /**
+     * lower (INT64),
+     * upper (INT64),
+     * lowerIncluded (BOOLEAN),
+     * upperIncluded (BOOLEAN)
+     */
     public static int INTERVAL_INT64 = 0;
+
+    /**
+     * lower (REAL),
+     * upper (REAL),
+     * lowerIncluded (BOOLEAN),
+     * upperIncluded (BOOLEAN)
+     */
     public static int INTERVAL_REAL = 0;
+
+    /**
+     * lower (DOUBLE),
+     * upper (DOUBLE),
+     * lowerIncluded (BOOLEAN),
+     * upperIncluded (BOOLEAN)
+     */
     public static int INTERVAL_DOUBLE = 0;
 
     public static int CHAR = 0;
-    public static int STRING = 0;
 
+    public static int STRING = 0;
     public static int ARRAY = 0;
+
     public static int LIST = 0;
     public static int SET = 0;
     public static int HASH = 0;
