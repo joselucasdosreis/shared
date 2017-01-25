@@ -21,6 +21,11 @@ public class Constantes {
     public static final int INDEFINIDO = -1;
 
     /**
+     * Indica zero elementos, zero componentes.
+     */
+    public static final int VAZIO = 0;
+
+    /**
      * Valor padrão do tamanho de um buffer.
      */
     public static final int BUFFER_SIZE = 4096;
