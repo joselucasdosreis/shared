@@ -13,63 +13,63 @@ import java.nio.ByteBuffer;
 
 /**
  * Uma base de dados pode estar organizada em um ou mais
- * arquivos, geralmente extensos o suficiente para ser inviável
- * a transferência deles para a memória RAM. A transferência é
- * necessária para processar o conteúdo da base de dados.
+ * arquivos. Um arquivos pode ser suficientemente extenso o
+ * para inviabilizar a sua transferência do seu conteúdo para
+ * a memória RAM. A transferência é necessária para processar
+ * o conteúdo da base de dados. A solução é transferir um bloco,
+ * uma parte do conteúdo.
  *
  * <p>Dado que não é assegurada a possibilidade de manter em RAM
  * o conteúdo completo de um arquivo, cada arquivo é dividido em
- * blocos de tamanho fixo ({@link Constantes#BUFFER_SIZE}). Um
- * bloco, por sua vez, pode ser transferido para a memória e,
- * no sentido inverso, persistido se alguma alteração foi realizada.
+ * blocos de tamanho fixo ({@link Constantes#BUFFER_SIZE}). Ao
+ * contrário do conteúdo do qual é obtido, um bloco pode ser
+ * transferido para a memória e, no sentido inverso, persistido.
  *
- * <p>O <i>Buffer Manager</i> é responsável por transferir para a
+ * <p>O <i>Buffer Manager</i> (BM) é responsável por transferir para a
  * memória RAM um bloco requisitado e, no sentido inverso, persistir
- * um bloco que passou por alteração. Tudo isso com a restrição de
- * um limite de blocos que podem ser mantidos em memória em um
- * dado instante de tempo. Ou seja, é necessário gerenciar o conjunto
- * de blocos em RAM (<i>buffers</i>) e, quando necessário, "descartar"
- * um bloco cuja memória (<i>buffer</i>) será liberada para uso por
- * outro bloco.
+ * um bloco presente em RAM. Um bloco é mantido em RAM em um <i>buffer</i>.
+ * Naturalmente, o número de rawBuffers empregados pelo BM é limitado.
+ * Cabe ao BM, quando necessário, identificar um buffer (e o bloco
+ * correspondente) cujo conteúdo será substituído pelo conteúdo de
+ * outro bloco, cujo acesso é requisitado ao BM. A estratégia do
+ * bloco de uso mais antigo é empregada nesse caso ({@link LRU}).
  *
  * <p>A requisição de um bloco (<i>buffer</i>) decorre das operações
- * de consultas e atualizações de dados requisitadas por clientes.
+ * de consultas e atualizações de dados requisitadas por clientes. As
+ * operações básicas são: (a) load e (b) unload. A primeira carrega um
+ * bloco, caso já não esteja disponível e a segunda "libera" o buffer
+ * do bloco correspondente para ser eventualmente reutilizado em
+ * posterior operação de load.
  *
- * <p>O <i>Buffer Manager</i>, por simplicidade apenas BM, é
- * configurado com a quantidade máxima de <i>buffers</i> a serem
- * gerenciados e o <i>File Manager</i>, responsável por gerir os
- * arquivos empregados, além de oferecer uma abstração sobre o real
- * mecanismo de armazenamento empregado, em geral, o sistema de
- * arquivos do sistema operacional em questão.
- *
- * <p>
  */
 public class BufferManager {
 
-    private ByteBuffer[] buffers;
-    private byte[][] bytes;
+    private ByteBuffer[] rawBuffers;
+    private byte[][] rawBytes;
+    private Buffer[] buffers;
 
     /**
-     * Inicia o BM com a quantidade de blocos (<i>buffers</i>)
+     * Inicia o BM com a quantidade de blocos (<i>rawBuffers</i>)
      * indicada.
      *
-     * @param totalBuffers Total de blocos (<i>buffers</i>) a serem
+     * @param totalBuffers Total de blocos (<i>rawBuffers</i>) a serem
      *                     gerenciados pelo BM.
      */
     public void start(int totalBuffers) {
 
-        buffers = new ByteBuffer[totalBuffers];
-        bytes = new byte[totalBuffers][];
+        // Aloca espaço propriamente dito que será empregado pelos rawBuffers.
+        // TODO ByteBuffer.allocate, ByteBuffer.directAllocate
+        // TODO Heap (objetos), Off heap (unsafe)
+        rawBuffers = new ByteBuffer[totalBuffers];
+        rawBytes = new byte[totalBuffers][];
+        buffers = new Buffer[totalBuffers];
 
         for (int i = 0; i < totalBuffers; i++) {
-            bytes[i] = new byte[Constantes.BUFFER_SIZE];
-            buffers[i] = ByteBuffer.wrap(bytes[i]);
+            // Ou o contrário, ByteBuffer.allocate and ByteBuffer.array()?
+            rawBytes[i] = new byte[Constantes.BUFFER_SIZE];
+            rawBuffers[i] = ByteBuffer.wrap(rawBytes[i]);
+
+            buffers[i] = new Buffer();
         }
-    }
-
-    // Versao 0 - assume um único arquivo predefinido
-
-    public int int32(int bloco, int offset) {
-        return 0;
     }
 }
