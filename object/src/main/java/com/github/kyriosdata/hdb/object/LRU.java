@@ -6,96 +6,93 @@ import java.util.HashMap;
  * Implementação de Least Recently Used (LRU) para permitir que
  * o bloco usado há mais tempo possa ser removido para ceder
  * espaço para outro, que ocupará o <i>buffer</i> correspondente.
- * 
- * <p>Essa implementação assume que o bloco é identificado por 
+ *
+ * <p>Essa implementação assume que o bloco é identificado por
  * um inteiro único e o <i>buffer</i> por ele empregado também
- * por um inteiro. O bloco é a chave e o <i>buffer</i> é o valor
- * no dicionário empregado na implementação.
- * 
+ * por um inteiro único. O bloco é a chave e o <i>buffer</i> é o
+ * valor no dicionário empregado na implementação.
+ *
  * <p>Essa classe não é <i>thread safe</i>. Ou seja, proteção
  * deverá ser oferecida, se for o caso, para que a funcionalidade
- * seja assegurada. 
+ * seja assegurada.
+ *
+ * <p>A implementação faz uso de um Map para localizar o <i>buffer</i>
+ * empregado por um bloco e de uma lista duplamente encadeada para
+ * permitir que o <i>buffer</i> localizado possa ir para o início
+ * da lista, mais recente, com número constante de operações.
+ *
+ * <p>Quando uma instância é criada a lista é preenchida totalmente.
+ * Ou seja, não são mais permitidas inserções. Restando uma única operação
+ * relevante para a implementação do LRU: "trazer" o nó que irá referenciar
+ * o bloco requisitado para a frente da lista ({@link #bringToFront(No)}).
  */
 public class LRU {
-    int capacity;
-    HashMap<Integer, Node> map;
-    Node head = null;
-    Node end = null;
+
+    private HashMap<Integer, No> usados;
+    private No head;
+    private No tail;
 
     public LRU(int capacity) {
-        this.capacity = capacity;
-        map = new HashMap<>(capacity);
+        usados = new HashMap<>(capacity);
+
+        head = new No(Integer.MIN_VALUE, 0);
+        tail = new No(Integer.MIN_VALUE, 1);
+
+        head.next = tail;
+        tail.prev = head;
+
+        for (int i = 2; i < capacity; i++) {
+            No n = new No(Integer.MIN_VALUE, i);
+            tail.next = n;
+            n.prev = tail;
+            tail = n;
+        }
     }
 
-    public int get(int key) {
-        if (map.containsKey(key)) {
-            Node n = map.get(key);
-            remove(n);
-            setHead(n);
-            return n.value;
+    public int use(int blocoId) {
+
+        No old = usados.get(blocoId);
+
+        if (old == null) {
+            old = tail;
+            usados.remove(old.key);
+            usados.put(blocoId, old);
+            old.key = blocoId;
         }
 
-        return -1;
+        bringToFront(old);
+
+        return old.value;
     }
 
-    public void remove(Node n) {
-        if (n.pre != null) {
-            n.pre.next = n.next;
+    private void bringToFront(No no) {
+        if (head == no) {
+            return;
+        }
+
+        no.prev.next = no.next;
+
+        if (no != tail) {
+            no.next.prev = no.prev;
         } else {
-            head = n.next;
+            tail = no.prev;
         }
 
-        if (n.next != null) {
-            n.next.pre = n.pre;
-        } else {
-            end = n.pre;
+        head.prev = no;
+        no.next = head;
+        no.prev = null;
+        head = no;
+    }
+
+    private class No {
+        int key;
+        int value;
+        No prev;
+        No next;
+
+        public No(int key, int value) {
+            this.key = key;
+            this.value = value;
         }
-
-    }
-
-    public void setHead(Node n) {
-        n.next = head;
-        n.pre = null;
-
-        if (head != null)
-            head.pre = n;
-
-        head = n;
-
-        if (end == null)
-            end = head;
-    }
-
-    public void set(int key, int value) {
-        if (map.containsKey(key)) {
-            Node old = map.get(key);
-            old.value = value;
-            remove(old);
-            setHead(old);
-        } else {
-            Node created = new Node(key, value);
-            if (map.size() >= capacity) {
-                map.remove(end.key);
-                remove(end);
-                setHead(created);
-
-            } else {
-                setHead(created);
-            }
-
-            map.put(key, created);
-        }
-    }
-}
-
-class Node {
-    int key;
-    int value;
-    Node pre;
-    Node next;
-
-    public Node(int key, int value) {
-        this.key = key;
-        this.value = value;
     }
 }
