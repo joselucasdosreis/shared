@@ -16,7 +16,7 @@ public class Campo {
     /**
      * Indica valor numérico inteiro de 32 bits.
      */
-    public static int INT = 0;
+    public static int INT32 = 0;
 
     public static int INT64 = 0;
     public static int REAL = 0;
@@ -26,8 +26,8 @@ public class Campo {
     public static int FALSE = 0;
 
     /**
-     * lower (INT),
-     * upper (INT),
+     * lower (INT32),
+     * upper (INT32),
      * lowerIncluded (BOOLEAN),
      * upperIncluded (BOOLEAN)
      */

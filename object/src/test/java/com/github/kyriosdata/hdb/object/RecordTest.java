@@ -9,6 +9,5 @@ public class RecordTest {
 
     @Test
     public void operacaoBasica() {
-        ObjectManager r = new ObjectManager(0);
     }
 }

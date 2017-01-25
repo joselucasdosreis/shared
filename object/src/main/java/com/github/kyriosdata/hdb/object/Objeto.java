@@ -1,3 +1,12 @@
+/*
+ * Copyright (c) 2016
+ *
+ * Fábio Nogueira de Lucena
+ * Fábrica de Software - Instituto de Informática (UFG)
+ *
+ * Creative Commons Attribution 4.0 International License.
+ */
+
 package com.github.kyriosdata.hdb.object;
 
 /**
@@ -59,7 +68,7 @@ public class Objeto {
 
     public int fragmentado(int offset, int size) {
         int restantes = restantes(dados, offset);
-        return restantes >= size ? 0 :
+        return restantes >= size ? 0 : 1;
     }
 
     /**

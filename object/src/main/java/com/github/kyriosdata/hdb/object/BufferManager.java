@@ -1,4 +1,15 @@
+/*
+ * Copyright (c) 2016
+ *
+ * Fábio Nogueira de Lucena
+ * Fábrica de Software - Instituto de Informática (UFG)
+ *
+ * Creative Commons Attribution 4.0 International License.
+ */
+
 package com.github.kyriosdata.hdb.object;
+
+import java.nio.ByteBuffer;
 
 /**
  * Uma base de dados pode estar organizada em um ou mais
@@ -23,8 +34,42 @@ package com.github.kyriosdata.hdb.object;
  *
  * <p>A requisição de um bloco (<i>buffer</i>) decorre das operações
  * de consultas e atualizações de dados requisitadas por clientes.
+ *
+ * <p>O <i>Buffer Manager</i>, por simplicidade apenas BM, é
+ * configurado com a quantidade máxima de <i>buffers</i> a serem
+ * gerenciados e o <i>File Manager</i>, responsável por gerir os
+ * arquivos empregados, além de oferecer uma abstração sobre o real
+ * mecanismo de armazenamento empregado, em geral, o sistema de
+ * arquivos do sistema operacional em questão.
+ *
+ * <p>
  */
 public class BufferManager {
 
-    public int
+    private ByteBuffer[] buffers;
+    private byte[][] bytes;
+
+    /**
+     * Inicia o BM com a quantidade de blocos (<i>buffers</i>)
+     * indicada.
+     *
+     * @param totalBuffers Total de blocos (<i>buffers</i>) a serem
+     *                     gerenciados pelo BM.
+     */
+    public void start(int totalBuffers) {
+
+        buffers = new ByteBuffer[totalBuffers];
+        bytes = new byte[totalBuffers][];
+
+        for (int i = 0; i < totalBuffers; i++) {
+            bytes[i] = new byte[Constantes.BUFFER_SIZE];
+            buffers[i] = ByteBuffer.wrap(bytes[i]);
+        }
+    }
+
+    // Versao 0 - assume um único arquivo predefinido
+
+    public int int32(int bloco, int offset) {
+        return 0;
+    }
 }

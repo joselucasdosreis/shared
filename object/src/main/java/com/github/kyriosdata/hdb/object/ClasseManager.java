@@ -29,7 +29,7 @@ public class ClasseManager {
     private static final Campo[][] classes = {
 
             // OE_DVIDENTIFIER
-            {new Campo("a", Campo.INT, 0),
+            {new Campo("a", Campo.INT32, 0),
                     new Campo("b", Campo.STRING, 4),
                     new Campo("b", Campo.STRING, -1)
             }
