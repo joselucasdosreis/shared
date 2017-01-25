@@ -22,7 +22,8 @@ import java.util.HashMap;
  * da lista, mais recente, com número constante de operações.
  *
  * <p>Quando uma instância é criada a lista é preenchida totalmente.
- * Ou seja, não são mais permitidas inserções. Restando uma única operação
+ * Ou seja, não são mais permitidas inserções, nem tampouco fazem
+ * sentido as remoções. Restando uma única operação
  * relevante para a implementação do LRU: "trazer" o nó que irá referenciar
  * o bloco requisitado para a frente da lista ({@link #bringToFront(No)}).
  */
@@ -51,18 +52,18 @@ public class LRU {
 
     public int use(int blocoId) {
 
-        No old = usados.get(blocoId);
+        No reutilizado = usados.get(blocoId);
 
-        if (old == null) {
-            old = tail;
-            usados.remove(old.key);
-            usados.put(blocoId, old);
-            old.key = blocoId;
+        if (reutilizado == null) {
+            reutilizado = tail;
+            usados.remove(reutilizado.key);
+            usados.put(blocoId, reutilizado);
+            reutilizado.key = blocoId;
         }
 
-        bringToFront(old);
+        bringToFront(reutilizado);
 
-        return old.value;
+        return reutilizado.value;
     }
 
     private void bringToFront(No no) {
