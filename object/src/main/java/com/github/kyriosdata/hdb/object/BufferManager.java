@@ -69,7 +69,7 @@ public class BufferManager {
             rawBytes[i] = new byte[Constantes.BUFFER_SIZE];
             rawBuffers[i] = ByteBuffer.wrap(rawBytes[i]);
 
-            buffers[i] = new Buffer();
+            buffers[i] = new BufferByteBuffer();
         }
     }
 }

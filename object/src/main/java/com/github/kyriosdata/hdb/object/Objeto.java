@@ -10,8 +10,10 @@
 package com.github.kyriosdata.hdb.object;
 
 /**
- * Um objeto do Modelo de Referência do openEHR.
- * Executa operações de consulta sobre os campos.
+ * Encapsula acesso a um objeto do Modelo de Referência do openEHR
+ * serializado no formato empregado pelo HealthDB.
+ *
+ * <p>Apenas operações de consulta estão disponíveis.
  */
 public class Objeto {
 
