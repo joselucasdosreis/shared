@@ -42,12 +42,17 @@ import java.util.HashMap;
  */
 public class LRU {
 
-    private HashMap<Integer, No> usados;
+    /**
+     * Dicionário de blocos "livres" para reutilização.
+     *
+     *
+     */
+    private HashMap<Integer, No> unlocked;
     private No head;
     private No tail;
 
     public LRU(int capacity) {
-        usados = new HashMap<>(capacity);
+        unlocked = new HashMap<>(capacity);
 
         head = new No(Integer.MIN_VALUE, 0);
         tail = new No(Integer.MIN_VALUE, 1);
@@ -86,12 +91,12 @@ public class LRU {
      */
     public int use(int blocoId) {
 
-        No reutilizado = usados.get(blocoId);
+        No reutilizado = unlocked.get(blocoId);
 
         if (reutilizado == null) {
             reutilizado = tail;
-            usados.remove(reutilizado.key);
-            usados.put(blocoId, reutilizado);
+            unlocked.remove(reutilizado.key);
+            unlocked.put(blocoId, reutilizado);
             reutilizado.key = blocoId;
         }
 

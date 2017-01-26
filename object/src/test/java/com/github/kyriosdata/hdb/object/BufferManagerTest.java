@@ -8,5 +8,7 @@ public class BufferManagerTest {
     public void simplesCriacao() {
         BufferManager bm = new BufferManager();
         bm.start(1000);
+
+
     }
 }
