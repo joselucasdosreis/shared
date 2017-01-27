@@ -9,7 +9,6 @@
 
 package com.github.kyriosdata.healthdb.file;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 
 /**
@@ -18,84 +17,97 @@ import java.nio.ByteBuffer;
  * arquivos das plataformas Windows, Linux e MacOS.
  */
 public class ArquivoServiceJava implements ArquivoService {
-    @Override
-    public void start(Object[] params) {
 
-    }
+    private ArquivoManager am;
 
     @Override
-    public int register(String filename) {
-        return 0;
-    }
-
-    @Override
-    public void unregister(int handle) {
-
-    }
-
-    @Override
-    public boolean existe(int handle) {
-        return false;
-    }
-
-    @Override
-    public boolean cria(int handle) {
-        return false;
-    }
-
-    @Override
-    public boolean remove(int handle) {
-        return false;
-    }
-
-    @Override
-    public boolean abre(int handle) {
-        return false;
-    }
-
-    @Override
-    public boolean fecha(int handle) {
-        return false;
-    }
-
-    @Override
-    public int acrescenta(int handle, ByteBuffer buffer) {
-        return 0;
-    }
-
-    @Override
-    public int acrescenta(int handle, byte[] buffer, int i, int total) {
-        return 0;
-    }
-
-    @Override
-    public void carrega(int handle, ByteBuffer buffer, int posicao) {
-
-    }
-
-    @Override
-    public void carrega(int handle, byte[] buffer, int posicao) {
-
-    }
-
-    @Override
-    public void escreve(int handle, ByteBuffer buffer, int posicao) {
-
-    }
-
-    @Override
-    public void escreve(int handle, byte[] buffer, int posicao) {
-
+    public void start(Object... params) {
+        am = new ArquivoManagerJava();
+        am.start();
     }
 
     /**
      * Força chamada do método {@link #unregister(int)} para os arquivos
      * gerenciados pelo serviço.
-     * 
-     * @throws IOException
+     *
      */
     @Override
-    public void close() throws IOException {
+    public void close() {
+        try {
+            am.close();
+        } catch (Exception exp) {
+            // Não faz nada.
+        }
+    }
 
+    @Override
+    public int register(String filename) {
+        return am.register(filename);
+    }
+
+    @Override
+    public void unregister(int handle) {
+        am.unregister(handle);
+    }
+
+    @Override
+    public boolean existe(int handle) {
+        return am.existe(handle);
+    }
+
+    @Override
+    public boolean cria(int handle) {
+        return am.cria(handle);
+    }
+
+    @Override
+    public boolean remove(int handle) {
+        return am.remove(handle);
+    }
+
+    @Override
+    public boolean abre(int handle) {
+        return am.abre(handle);
+    }
+
+    @Override
+    public boolean fecha(int handle) {
+        return am.fecha(handle);
+    }
+
+    @Override
+    public int acrescenta(int handle, ByteBuffer buffer) {
+        Arquivo arquivo = am.get(handle);
+        return arquivo == null ? -1 : arquivo.acrescenta(buffer);
+    }
+
+    @Override
+    public int acrescenta(int handle, byte[] buffer, int i, int total) {
+        Arquivo arquivo = am.get(handle);
+        return arquivo == null ? -1 : arquivo.acrescenta(buffer, i, total);
+    }
+
+    @Override
+    public int carrega(int handle, ByteBuffer buffer, int posicao) {
+        Arquivo arquivo = am.get(handle);
+        return arquivo == null ? -1 : arquivo.carrega(buffer, posicao);
+    }
+
+    @Override
+    public int carrega(int handle, byte[] buffer, int posicao) {
+        Arquivo arquivo = am.get(handle);
+        return arquivo == null ? -1 : arquivo.carrega(buffer, posicao);
+    }
+
+    @Override
+    public int escreve(int handle, ByteBuffer buffer, int posicao) {
+        Arquivo arquivo = am.get(handle);
+        return arquivo == null ? -1 : arquivo.escreve(buffer, posicao);
+    }
+
+    @Override
+    public int escreve(int handle, byte[] buffer, int posicao) {
+        Arquivo arquivo = am.get(handle);
+        return arquivo == null ? -1 : arquivo.escreve(buffer, posicao);
     }
 }

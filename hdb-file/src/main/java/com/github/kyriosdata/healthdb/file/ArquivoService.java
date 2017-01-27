@@ -182,7 +182,7 @@ public interface ArquivoService extends Closeable {
      *
      * @see #carrega(int, byte[], int)
      */
-    void carrega(int handle, ByteBuffer buffer, int posicao);
+    int carrega(int handle, ByteBuffer buffer, int posicao);
 
     /**
      * Obtém do arquivo o total de bytes, a partir de determinada posição, e
@@ -201,7 +201,7 @@ public interface ArquivoService extends Closeable {
      *
      * @see #carrega(int, ByteBuffer, int)
      */
-    void carrega(int handle, byte[] buffer, int posicao);
+    int carrega(int handle, byte[] buffer, int posicao);
 
     /**
      * Deposita no arquivo, a partir da posição indicada, o total de
@@ -217,7 +217,7 @@ public interface ArquivoService extends Closeable {
      *
      * @see #escreve(int, byte[], int)
      */
-    void escreve(int handle, ByteBuffer buffer, int posicao);
+    int escreve(int handle, ByteBuffer buffer, int posicao);
 
     /**
      * Deposita no arquivo, a partir da posição indicada, o total de
@@ -233,5 +233,5 @@ public interface ArquivoService extends Closeable {
      *
      * @see #escreve(int, ByteBuffer, int)
      */
-    void escreve(int handle, byte[] buffer, int posicao);
+    int escreve(int handle, byte[] buffer, int posicao);
 }

@@ -9,6 +9,8 @@
 
 package com.github.kyriosdata.healthdb.file;
 
+import java.io.Closeable;
+
 /**
  * Define serviços básicos de gerência do
  * ciclo de vida de um arquivo ({@link Arquivo}).
@@ -28,7 +30,7 @@ package com.github.kyriosdata.healthdb.file;
  *
  * @see Arquivo
  */
-public interface ArquivoManager {
+public interface ArquivoManager extends Closeable {
 
     /**
      * Prepara o administrador (gerente) de arquivos.
@@ -41,7 +43,7 @@ public interface ArquivoManager {
      *               Esse método deve ser chamado antes que
      *               qualquer serviço oferecido seja executado.
      */
-    void start(Object[] params);
+    void start(Object... params);
 
     /**
      * Recupera o nome do arquivo associado ao handle.

@@ -49,6 +49,23 @@ public class ArquivoManagerJava implements ArquivoManager {
     }
 
     @Override
+    public void close() {
+
+        // Fechar os arquivos gerenciados
+        for(Arquivo arquivo : handleToArquivo.values()) {
+            arquivo.fecha();
+        }
+
+        handleToArquivo.clear();
+        handleToArquivo = null;
+
+        nomeToHandle.clear();
+        nomeToHandle = null;
+
+        handleGenerator = null;
+    }
+
+    @Override
     public boolean abre(int handle) {
         Arquivo arquivo = handleToArquivo.get(handle);
         return arquivo != null && arquivo.abre();
