@@ -76,10 +76,9 @@ public class ArquivoManagerJava implements ArquivoManager {
         return Files.exists(Paths.get(filename(handle)));
     }
 
-    private String filename(int handle) {
-        Arquivo arquivo = handleToArquivo.get(handle);
-
-        return arquivo == null ? null : arquivo.filename();
+    @Override
+    public String filename(int handle) {
+        return handleToName.get(handle);
     }
 
     @Override

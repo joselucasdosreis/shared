@@ -2,8 +2,9 @@ package com.github.kyriosdata.healthdb.file;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ArquivoManagerTest {
 
@@ -25,9 +26,14 @@ public class ArquivoManagerTest {
     public void registerUnregisterSameFileManyTimes() throws Exception {
         ArquivoManager am = new ArquivoManagerJava();
 
+        String inexistente = UUID.randomUUID().toString();
         for(int i = 0; i < 1000; i++) {
-            int handle = am.register("arquivo.dat");
+            int handle = am.register(inexistente);
+            assertFalse(am.existe(handle));
+            assertEquals(inexistente, am.filename(handle));
+
             am.unregister(handle);
+            assertNull(am.filename(handle));
         }
     }
 

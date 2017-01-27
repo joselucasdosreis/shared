@@ -137,4 +137,14 @@ public interface ArquivoManager {
      * associado ao handle.
      */
     Arquivo get(int handle);
+
+    /**
+     * Recupera o nome do arquivo associado ao handle.
+     *
+     * @param handle O handle do arquivo.
+     *
+     * @return Nome do arquivo associado ao handle ou o valor
+     * {@code null}, caso não esteja registrado.
+     */
+    String filename(int handle);
 }
