@@ -24,6 +24,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ArquivoManagerJava implements ArquivoManager {
 
     private final int INITIAL_CAPACITY = 128;
+
+    /**
+     * Gerador de handles únicos para arquivos.
+     */
     private AtomicInteger handleGenerator;
 
     /**
@@ -43,13 +47,6 @@ public class ArquivoManagerJava implements ArquivoManager {
      * correspondente.
      */
     private Map<Integer, Arquivo> handleToArquivo;
-
-    public ArquivoManagerJava() {
-        nomeToHandle = new HashMap<>(INITIAL_CAPACITY);
-        handleToName = new HashMap<>(INITIAL_CAPACITY);
-        handleToArquivo = new HashMap<>(INITIAL_CAPACITY);
-        handleGenerator = new AtomicInteger(-1);
-    }
 
     @Override
     public boolean abre(int handle) {
@@ -102,8 +99,10 @@ public class ArquivoManagerJava implements ArquivoManager {
     }
 
     @Override
-    public void start(Object[] params) {
+    public void start(Object... params) {
         nomeToHandle = new HashMap<>(INITIAL_CAPACITY);
+        handleToName = new HashMap<>(INITIAL_CAPACITY);
+        handleToArquivo = new HashMap<>(INITIAL_CAPACITY);
         handleGenerator = new AtomicInteger(-1);
     }
 

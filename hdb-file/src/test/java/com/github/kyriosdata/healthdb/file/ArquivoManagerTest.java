@@ -12,19 +12,30 @@ public class ArquivoManagerTest {
 
     @Test
     public void mesmoArquivoMesmoHandle() throws Exception {
-        ArquivoManager am = new ArquivoManagerJava();
+        ArquivoManagerJava am = new ArquivoManagerJava();
+        am.start();
 
         int h1 = am.register("1.txt");
-        int h2 = am.register("2.txt");
-        int h3 = am.register("1.txt");
+        int h2 = am.register("1.txt");
+
+        assertEquals(h1, h2);
+    }
+
+    @Test
+    public void arquivosDistintosHandlesDistintos() throws Exception {
+        ArquivoManagerJava am = new ArquivoManagerJava();
+        am.start();
+
+        int h1 = am.register("a");
+        int h2 = am.register("b");
 
         assertNotEquals(h1, h2);
-        assertEquals(h1, h3);
     }
 
     @Test
     public void registerUnregisterSameFileManyTimes() throws Exception {
-        ArquivoManager am = new ArquivoManagerJava();
+        ArquivoManagerJava am = new ArquivoManagerJava();
+        am.start();
 
         String inexistente = UUID.randomUUID().toString();
         for(int i = 0; i < 1000; i++) {
