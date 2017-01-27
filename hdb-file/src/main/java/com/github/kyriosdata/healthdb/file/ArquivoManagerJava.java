@@ -123,7 +123,6 @@ public class ArquivoManagerJava implements ArquivoManager {
 
     @Override
     public void unregister(int handle) {
-
         String name = handleToName.get(handle);
         if (name != null) {
             Arquivo arquivo = handleToArquivo.get(handle);
