@@ -18,6 +18,10 @@ import java.nio.file.StandardOpenOption;
 
 /**
  * Implementação de {@link Arquivo} usando biblioteca Java NIO.
+ * Um objeto dessa classe é projetado para ser reutilizado. Ou
+ * seja, ao longo da vida de uma instância dessa classe vários
+ * arquivos podem ser referenciados pela mesma, observando-se o
+ * fato de que apenas um arquivo é referenciado por vez.
  */
 public class ArquivoJava implements Arquivo, Closeable {
 
@@ -25,17 +29,21 @@ public class ArquivoJava implements Arquivo, Closeable {
     private SeekableByteChannel channel;
 
     @Override
-    public String filename() {
-        return path.toString();
-    }
-
-    @Override
     public void filename(String nome) {
         path = Paths.get(nome);
     }
 
     @Override
+    public String filename() {
+        return path.toString();
+    }
+
+    @Override
     public boolean abre() {
+        if (estaAberto()) {
+            return true;
+        }
+
         try {
             channel = Files.newByteChannel(path, StandardOpenOption.READ, StandardOpenOption.WRITE);
         } catch (IOException exp) {

@@ -14,9 +14,8 @@ import java.nio.ByteBuffer;
 
 /**
  * Define serviços de gerência ({@link ArquivoManager}) e de
- * manipulação (leitura e escrita) de arquivos, aqui abstratamente
- * considerados como sequências de bytes divididas em blocos de
- * tamanho fixo.
+ * manipulação (leitura e escrita) de arquivos. Um arquivo é
+ * uma sequência de bytes.
  *
  * <p>A identificação de um arquivo é feita pelo nome (String)
  * fornecido ao método {@link #register(String)}, que retorna o
@@ -53,11 +52,17 @@ public interface ArquivoService extends Closeable {
      * Registra o nome de arquivo, cujo handle correspondente,
      * empregado pelas demais operações oferecidas, é retornado.
      *
+     * <p>É recomendado que o cliente chame o método
+     * {@link #unregister(int)} para realizar a operação de
+     * função inversa, quando o arquivo não for mais utilizado.
+     *
      * @param filename Nome do arquivo (identificador) para o quel
      *                 o handle deve ser criado.
      *
      * @return O handle, valor inteiro único correspondente ao
      * arquivo.
+     *
+     * @see #unregister(int)
      */
     int register(String filename);
 

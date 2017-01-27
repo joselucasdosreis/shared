@@ -11,12 +11,12 @@ package com.github.kyriosdata.healthdb.file;
 
 import org.junit.jupiter.api.Test;
 
-public class ArquivoServiceJavaTest {
+public class ArquivoSevicePadraoTest {
 
     @Test
     public void iniciarPararInumerasVezes() {
         for (int i = 0; i < 100; i++) {
-            try (ArquivoServiceJava asj = new ArquivoServiceJava()) {
+            try (ArquivoServicePadrao asj = new ArquivoServicePadrao()) {
                 asj.start();
             }
         }

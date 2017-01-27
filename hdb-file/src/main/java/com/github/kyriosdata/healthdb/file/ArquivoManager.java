@@ -73,6 +73,7 @@ public interface ArquivoManager extends Closeable {
 
     /**
      * Elimina o registro do arquivo cujo handle é fornecido.
+     * O arquivo é fechado nesse processo.
      *
      * @param handle O handle do arquivo cujo registro deve
      *               ser removido.

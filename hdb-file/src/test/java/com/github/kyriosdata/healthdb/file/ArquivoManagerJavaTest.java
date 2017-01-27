@@ -52,6 +52,17 @@ public class ArquivoManagerJavaTest {
     }
 
     @Test
+    public void startCloseManyTimes() {
+        for(int i = 0; i < 100; i++) {
+            try (ArquivoManagerJava am = new ArquivoManagerJava()) {
+                am.start();
+
+                am.register("ok");
+            }
+        }
+    }
+
+    @Test
     public void semEfeitoUnregisterDeArquivoNaoRegistrado() {
         ArquivoManagerJava amj = new ArquivoManagerJava();
         amj.start();

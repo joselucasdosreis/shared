@@ -22,6 +22,10 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class ArquivoManagerJava implements ArquivoManager {
 
+    /**
+     * Capacidade inicial prevista para o gerente.
+     * TODO criar lista circular e limitar a 128 (GC)
+     */
     private final int INITIAL_CAPACITY = 128;
 
     /**
@@ -52,7 +56,7 @@ public class ArquivoManagerJava implements ArquivoManager {
     public void close() {
 
         // Fechar os arquivos gerenciados
-        for(Arquivo arquivo : handleToArquivo.values()) {
+        for (Arquivo arquivo : handleToArquivo.values()) {
             arquivo.fecha();
         }
 
@@ -141,6 +145,6 @@ public class ArquivoManagerJava implements ArquivoManager {
         nomeToHandle.remove(arquivo.filename());
 
         // Fecha o arquivo
-        fecha(handle);
+        arquivo.fecha();
     }
 }

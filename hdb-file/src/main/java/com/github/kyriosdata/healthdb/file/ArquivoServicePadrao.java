@@ -16,7 +16,7 @@ import java.nio.ByteBuffer;
  * baseados na biblioteca Java para os sistemas de
  * arquivos das plataformas Windows, Linux e MacOS.
  */
-public class ArquivoServiceJava implements ArquivoService {
+public class ArquivoServicePadrao implements ArquivoService {
 
     private ArquivoManager am;
 
