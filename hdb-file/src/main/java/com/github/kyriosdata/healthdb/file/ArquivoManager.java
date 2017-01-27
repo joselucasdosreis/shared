@@ -44,6 +44,18 @@ public interface ArquivoManager {
     void start(Object[] params);
 
     /**
+     * Recupera o nome do arquivo associado ao handle.
+     *
+     * @param handle O handle do arquivo.
+     *
+     * @return Nome do arquivo associado ao handle ou o valor
+     * {@code null}, caso não esteja registrado.
+     *
+     * @see #register(String)
+     */
+    String filename(int handle);
+
+    /**
      * Registra o nome de arquivo, cujo handle correspondente,
      * empregado pelas demais operações oferecidas, é retornado.
      *
@@ -52,6 +64,8 @@ public interface ArquivoManager {
      *
      * @return O handle, valor inteiro único correspondente ao
      * arquivo.
+     *
+     * @see #filename(int)
      */
     int register(String filename);
 
@@ -137,14 +151,4 @@ public interface ArquivoManager {
      * associado ao handle.
      */
     Arquivo get(int handle);
-
-    /**
-     * Recupera o nome do arquivo associado ao handle.
-     *
-     * @param handle O handle do arquivo.
-     *
-     * @return Nome do arquivo associado ao handle ou o valor
-     * {@code null}, caso não esteja registrado.
-     */
-    String filename(int handle);
 }

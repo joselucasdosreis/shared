@@ -2,6 +2,9 @@ package com.github.kyriosdata.healthdb.file;
 
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -45,6 +48,52 @@ public class ArquivoManagerTest {
 
             am.unregister(handle);
             assertNull(am.filename(handle));
+        }
+    }
+
+    @Test
+    public void arquivoNomeUuidNaoExiste() {
+        String nome = UUID.randomUUID().toString();
+
+        ArquivoManagerJava amj = new ArquivoManagerJava();
+        amj.start();
+
+        int handle = amj.register(nome);
+        assertFalse(amj.existe(handle));
+    }
+
+    @Test
+    public void aposCriacaoArquivoExiste() {
+        String nome = dir + UUID.randomUUID().toString();
+        cria(nome);
+
+        ArquivoManagerJava amj = new ArquivoManagerJava();
+        amj.start();
+
+        int handle = amj.register(nome);
+        assertTrue(amj.existe(handle));
+    }
+
+    @Test
+    public void criaRemoveArquivo() {
+        String nome = dir + UUID.randomUUID().toString();
+
+        ArquivoManagerJava amj = new ArquivoManagerJava();
+        amj.start();
+
+        int handle = amj.register(nome);
+        assertFalse(amj.existe(handle));
+
+        assertTrue(amj.cria(handle));
+        assertTrue(amj.existe(handle));
+        assertTrue(amj.remove(handle));
+        assertFalse(amj.existe(handle));
+    }
+
+    private void cria(String fn) {
+        try {
+            Files.createFile(Paths.get(fn));
+        } catch (IOException exp) {
         }
     }
 }
