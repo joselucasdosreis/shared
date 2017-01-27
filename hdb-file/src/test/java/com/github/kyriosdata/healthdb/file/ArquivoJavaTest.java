@@ -135,6 +135,21 @@ public class ArquivoJavaTest {
         assertEquals(-1, aj.escreve(bytes, -1));
     }
 
+    @Test
+    public void arquivoEstaAbertoAposAbre() {
+        String fn = dir + UUID.randomUUID().toString();
+        cria(fn);
+
+        ArquivoJava aj = new ArquivoJava();
+        aj.filename(fn);
+
+        assertFalse(aj.estaAberto());
+        aj.abre();
+        assertTrue(aj.estaAberto());
+        aj.fecha();
+        assertFalse(aj.estaAberto());
+    }
+
     private void cria(String fn) {
         try {
             Files.createFile(Paths.get(fn));

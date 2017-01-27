@@ -56,12 +56,17 @@ public class ArquivoManagerJava implements ArquivoManager {
             return false;
         }
 
-        return false;
+        return arquivo.abre();
     }
 
     @Override
     public boolean fecha(int handle) {
-        return false;
+        Arquivo arquivo = handleToArquivo.get(handle);
+        if (arquivo == null) {
+            return false;
+        }
+
+        return arquivo.fecha();
     }
 
     @Override

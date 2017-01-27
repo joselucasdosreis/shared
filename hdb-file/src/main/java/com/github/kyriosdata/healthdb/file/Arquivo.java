@@ -55,6 +55,14 @@ public interface Arquivo {
     boolean abre();
 
     /**
+     * Verifica se o arquivo está aberto.
+     *
+     * @return {@code true} se o arquivo está aberto e
+     * {@code false}, caso contrário.
+     */
+    boolean estaAberto();
+
+    /**
      * Fecha o arquivo, cujas operações de leitura/escrita correspondentes
      * tornam-se indisponíveis.
      *

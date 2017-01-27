@@ -90,6 +90,43 @@ public class ArquivoManagerTest {
         assertFalse(amj.existe(handle));
     }
 
+    @Test
+    public void arquivoInexistenteNaoPodeSerAberto() {
+        String nome = dir + UUID.randomUUID().toString();
+
+        ArquivoManagerJava amj = new ArquivoManagerJava();
+        amj.start();
+
+        int handle = amj.register(nome);
+        assertFalse(amj.existe(handle));
+
+        assertFalse(amj.abre(handle));
+    }
+
+    @Test
+    public void arquivoNaoAbertoNaoPodeSerFechado() {
+        ArquivoManagerJava amj = new ArquivoManagerJava();
+        amj.start();
+
+        int handle = amj.register("a");
+        assertFalse(amj.fecha(handle));
+    }
+
+    @Test
+    public void arquivoCriadoPodeSerAberto() {
+        String nome = dir + UUID.randomUUID().toString();
+        cria(nome);
+
+        ArquivoManagerJava amj = new ArquivoManagerJava();
+        amj.start();
+
+        int handle = amj.register(nome);
+        assertTrue(amj.abre(handle));
+        assertTrue(amj.fecha(handle));
+    }
+
+
+
     private void cria(String fn) {
         try {
             Files.createFile(Paths.get(fn));

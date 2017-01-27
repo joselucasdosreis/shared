@@ -46,6 +46,11 @@ public class ArquivoJava implements Arquivo, Closeable {
     }
 
     @Override
+    public boolean estaAberto() {
+        return channel != null && channel.isOpen() ? true : false;
+    }
+
+    @Override
     public boolean fecha() {
         try {
             channel.close();
