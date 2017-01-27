@@ -21,7 +21,8 @@ public class ArquivoJavaTest {
 
         final ArquivoJava refToA;
         try (ArquivoJava a = new ArquivoJava()) {
-            assertTrue(a.abre(fn));
+            a.filename(fn);
+            assertTrue(a.abre());
             refToA = a;
         }
 
@@ -47,7 +48,9 @@ public class ArquivoJavaTest {
         cria(fn);
 
         ArquivoJava a = new ArquivoJava();
-        assertTrue(a.abre(fn));
+        a.filename(fn);
+
+        assertTrue(a.abre());
 
         assertTrue(a.filename().startsWith(dir));
         assertTrue(a.filename().endsWith(name));
@@ -57,7 +60,9 @@ public class ArquivoJavaTest {
     public void arquivoInexistenteNaoPodeSerAberto() {
         String fn = dir + UUID.randomUUID().toString();
         ArquivoJava a = new ArquivoJava();
-        assertFalse(a.abre(fn));
+        a.filename(fn);
+
+        assertFalse(a.abre());
     }
 
     @Test
@@ -66,7 +71,9 @@ public class ArquivoJavaTest {
         cria(fn);
 
         ArquivoJava a = new ArquivoJava();
-        assertTrue(a.abre(fn));
+        a.filename(fn);
+
+        assertTrue(a.abre());
     }
 
     @Test
@@ -75,8 +82,11 @@ public class ArquivoJavaTest {
         cria(fn);
 
         ArquivoJava aj = new ArquivoJava();
+        aj.filename(fn);
+
         for (int i = 0; i < 1000; i++) {
-            assertTrue(aj.abre(fn));
+            aj.filename(fn);
+            assertTrue(aj.abre());
             assertTrue(aj.fecha());
         }
     }
@@ -87,7 +97,9 @@ public class ArquivoJavaTest {
         cria(fn);
 
         ArquivoJava aj = new ArquivoJava();
-        aj.abre(fn);
+        aj.filename(fn);
+
+        aj.abre();
 
         byte[] bytes = "ok".getBytes(StandardCharsets.UTF_8);
 
@@ -96,7 +108,8 @@ public class ArquivoJavaTest {
         assertTrue(aj.fecha());
 
         // Reutiliza instância
-        assertTrue(aj.abre(fn));
+        aj.filename(fn);
+        assertTrue(aj.abre());
 
         // Carrega conteúdo existente
         byte[] recuperado = new byte[1024];
@@ -112,7 +125,8 @@ public class ArquivoJavaTest {
         cria(fn);
 
         ArquivoJava aj = new ArquivoJava();
-        aj.abre(fn);
+        aj.filename(fn);
+        aj.abre();
 
         byte[] bytes = new byte[1];
 

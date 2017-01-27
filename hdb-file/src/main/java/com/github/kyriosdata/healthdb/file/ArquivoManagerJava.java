@@ -49,6 +49,14 @@ public class ArquivoManagerJava implements ArquivoManager {
     private Map<Integer, Arquivo> handleToArquivo;
 
     @Override
+    public void start(Object... params) {
+        nomeToHandle = new HashMap<>(INITIAL_CAPACITY);
+        handleToName = new HashMap<>(INITIAL_CAPACITY);
+        handleToArquivo = new HashMap<>(INITIAL_CAPACITY);
+        handleGenerator = new AtomicInteger(-1);
+    }
+
+    @Override
     public boolean abre(int handle) {
         Arquivo arquivo = handleToArquivo.get(handle);
         if (arquivo == null) {
@@ -96,14 +104,6 @@ public class ArquivoManagerJava implements ArquivoManager {
         } catch (IOException e) {
             return false;
         }
-    }
-
-    @Override
-    public void start(Object... params) {
-        nomeToHandle = new HashMap<>(INITIAL_CAPACITY);
-        handleToName = new HashMap<>(INITIAL_CAPACITY);
-        handleToArquivo = new HashMap<>(INITIAL_CAPACITY);
-        handleGenerator = new AtomicInteger(-1);
     }
 
     @Override

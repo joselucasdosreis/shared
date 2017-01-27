@@ -25,8 +25,17 @@ public class ArquivoJava implements Arquivo, Closeable {
     private SeekableByteChannel channel;
 
     @Override
-    public boolean abre(String nome) {
+    public String filename() {
+        return path.toString();
+    }
+
+    @Override
+    public void filename(String nome) {
         path = Paths.get(nome);
+    }
+
+    @Override
+    public boolean abre() {
         try {
             channel = Files.newByteChannel(path, StandardOpenOption.READ, StandardOpenOption.WRITE);
         } catch (IOException exp) {
@@ -114,11 +123,6 @@ public class ArquivoJava implements Arquivo, Closeable {
     @Override
     public int escreve(byte[] buffer, int posicao) {
         return escreve(ByteBuffer.wrap(buffer), posicao);
-    }
-
-    @Override
-    public String filename() {
-        return path.toString();
     }
 
     @Override

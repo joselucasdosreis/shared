@@ -30,14 +30,29 @@ import java.nio.ByteBuffer;
 public interface Arquivo {
 
     /**
-     * Abre o arquivo, tanto para leitura quanto para escrita.
+     * Recupera o nome (identificador) do arquivo.
      *
-     * @param nome O nome do arquivo.
+     * @return O nome (identificador) único do arquivo.
+     *
+     * @see #filename(String)
+     */
+    String filename();
+
+    /**
+     * Define o nome (identificador) do arquivo.
+     * @param nome O nome (identificador) do arquivo.
+     *
+     * @see #filename()
+     */
+    void filename(String nome);
+
+    /**
+     * Abre o arquivo, tanto para leitura quanto para escrita.
      *
      * @return {@code true} se o arquivo foi aberto corretamente, ou
      * {@code false}, caso contrário.
      */
-    boolean abre(String nome);
+    boolean abre();
 
     /**
      * Fecha o arquivo, cujas operações de leitura/escrita correspondentes
@@ -147,11 +162,4 @@ public interface Arquivo {
      * @see #escreve(ByteBuffer, int)
      */
     int escreve(byte[] buffer, int posicao);
-
-    /**
-     * Recupera o nome (identificador) do arquivo.
-     *
-     * @return O nome (identificador) único do arquivo.
-     */
-    String filename();
 }
