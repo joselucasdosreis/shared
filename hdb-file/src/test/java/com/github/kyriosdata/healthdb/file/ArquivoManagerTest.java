@@ -2,12 +2,33 @@ package com.github.kyriosdata.healthdb.file;
 
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+
 public class ArquivoManagerTest {
 
     private String dir = getClass().getResource(".").getFile();
 
     @Test
-    public void registra() throws Exception {
+    public void mesmoArquivoMesmoHandle() throws Exception {
+        ArquivoManager am = new ArquivoManagerJava();
+
+        int h1 = am.register("1.txt");
+        int h2 = am.register("2.txt");
+        int h3 = am.register("1.txt");
+
+        assertNotEquals(h1, h2);
+        assertEquals(h1, h3);
+    }
+
+    @Test
+    public void registerUnregisterSameFileManyTimes() throws Exception {
+        ArquivoManager am = new ArquivoManagerJava();
+
+        for(int i = 0; i < 1000; i++) {
+            int handle = am.register("arquivo.dat");
+            am.unregister(handle);
+        }
     }
 
 }

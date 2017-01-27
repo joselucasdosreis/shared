@@ -33,13 +33,31 @@ public class ArquivoManagerJava implements ArquivoManager {
     private Map<String, Integer> nomeToHandle;
 
     /**
+     * Mantém a relação entre handles e os nomes correspondentes.
+     * Fornece informação inversa ao da propriedade {@link #nomeToHandle}.
+     */
+    private Map<Integer, String> handleToName;
+
+    /**
      * Mantém a relação entre um handle e o arquivo
      * correspondente.
      */
-    private Map<Integer, Arquivo> arquivos;
+    private Map<Integer, Arquivo> handleToArquivo;
+
+    public ArquivoManagerJava() {
+        nomeToHandle = new HashMap<>(INITIAL_CAPACITY);
+        handleToName = new HashMap<>(INITIAL_CAPACITY);
+        handleToArquivo = new HashMap<>(INITIAL_CAPACITY);
+        handleGenerator = new AtomicInteger(-1);
+    }
 
     @Override
     public boolean abre(int handle) {
+        Arquivo arquivo = handleToArquivo.get(handle);
+        if (arquivo == null) {
+            return false;
+        }
+
         return false;
     }
 
@@ -59,7 +77,7 @@ public class ArquivoManagerJava implements ArquivoManager {
     }
 
     private String filename(int handle) {
-        Arquivo arquivo = arquivos.get(handle);
+        Arquivo arquivo = handleToArquivo.get(handle);
 
         return arquivo == null ? null : arquivo.filename();
     }
@@ -94,7 +112,10 @@ public class ArquivoManagerJava implements ArquivoManager {
     public int register(String filename) {
         Integer handle = nomeToHandle.get(filename);
         if (handle == null) {
-            return nomeToHandle.put(filename, handleGenerator.decrementAndGet());
+            int newHandle = handleGenerator.decrementAndGet();
+            nomeToHandle.put(filename, newHandle);
+            handleToName.put(newHandle, filename);
+            handle = newHandle;
         }
 
         return handle;
@@ -103,5 +124,16 @@ public class ArquivoManagerJava implements ArquivoManager {
     @Override
     public void unregister(int handle) {
 
+        String name = handleToName.get(handle);
+        if (name != null) {
+            Arquivo arquivo = handleToArquivo.get(handle);
+            if (arquivo != null) {
+                fecha(handle);
+            }
+
+            handleToArquivo.remove(handle);
+            nomeToHandle.remove(name);
+            handleToName.remove(handle);
+        }
     }
 }
