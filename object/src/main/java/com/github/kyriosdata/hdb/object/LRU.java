@@ -13,22 +13,13 @@ import java.util.HashMap;
 
 /**
  * Implementação de Least Recently Used (LRU) para permitir que
- * o bloco usado há mais tempo possa ceder o espaço do <i>buffer</i>
- * correspondente para outro bloco.
- *
- * <p>Essa implementação assume que o bloco é identificado por
- * um inteiro único e o <i>buffer</i> por ele empregado também
- * por um inteiro único. O bloco é a chave e o <i>buffer</i> é o
- * valor no dicionário empregado na implementação.
+ * o bloco usado há mais tempo, dentre aqueles ditos "unlocked",
+ * possa ceder o espaço do <i>buffer</i> correspondente para outro
+ * bloco.
  *
  * <p>Essa classe não é <i>thread safe</i>. Ou seja, proteção
  * deverá ser oferecida, se for o caso, para que a funcionalidade
  * seja assegurada.
- *
- * <p>A implementação faz uso de um Map para localizar o <i>buffer</i>
- * empregado por um bloco e de uma lista duplamente encadeada para
- * permitir que o <i>buffer</i> localizado possa ir para o início
- * da lista, mais recente, com número constante de operações.
  *
  * <p>Quando uma instância é criada a lista é preenchida totalmente.
  * Ou seja, não são mais permitidas inserções, nem tampouco fazem
@@ -122,6 +113,20 @@ public class LRU {
         no.next = head;
         no.prev = null;
         head = no;
+    }
+
+    /**
+     * Adiciona o bloco como o mais recentemente utilizado.
+     * Ou seja, será o último, dentre todos os disponíveis
+     * após a inserção, a ser recuperado pelo método {@link #get()}.
+     *
+     * @param bloco O bloco a ser adicionado ao final da fila.
+     */
+    public void add(Bloco bloco) {
+    }
+
+    public Bloco get() {
+        return new Bloco(new BufferByteBuffer());
     }
 
     private class No {

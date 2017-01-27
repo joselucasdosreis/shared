@@ -25,7 +25,7 @@ import java.util.Set;
  * <p>
  * <p>Dado que não é assegurada a possibilidade de manter em RAM
  * o conteúdo completo de um arquivo, cada arquivo é dividido em
- * blocos de tamanho fixo ({@link Constantes#BUFFER_SIZE}). Ao
+ * locked de tamanho fixo ({@link Constantes#BUFFER_SIZE}). Ao
  * contrário do conteúdo do qual é obtido, um bloco pode ser
  * transferido para a memória e, no sentido inverso, persistido.
  * <p>
@@ -79,54 +79,43 @@ public class BufferManager {
     private LRU lru;
 
     /**
-     * Conjunto de blocos gerenciados pelo BM. Ou seja,
+     * Conjunto de locked gerenciados pelo BM. Ou seja,
      * estão depositados em buffers e estão prontos para uso.
      * Inicialmente esse conjunto é vazio. Contudo, a capacidade
      * é limitada pelo total de buffers.
      *
      * <p>À medida em que o BM é utilizado esse conjunto é
-     * acrescido de blocos carregados. Quando um bloco é
+     * acrescido de locked carregados. Quando um bloco é
      * substituído por outro, reutilização do buffer correspondente,
      * o bloco em questão é removido desse conjunto.
      */
     private Set<Integer> disponiveis;
 
     /**
-     * Blocos gerenciados pelo BM.
+     * Blocos gerenciados pelo BM (locked).
      * A capacidade do dicionário
      * não varia com o tempo e é
      * a mesma do total de buffers.
      */
-    private Map<Integer, Bloco> blocos;
+    private Map<Integer, Bloco> locked;
 
     /**
-     * Conjunto de buffers e os blocos associados.
+     * Conjunto de buffers e os locked associados.
      */
     private Bloco[] bb;
 
     /**
      * Executa operações de inicialização do BM.
      *
-     * @param totalBuffers Total de blocos (<i>rawBuffers</i>) a serem
+     * @param totalBuffers Total de locked (<i>rawBuffers</i>) a serem
      *                     gerenciados pelo BM.
      */
     public void start(int totalBuffers) {
 
-        blocos = new HashMap<>(totalBuffers);
+        locked = new HashMap<>(totalBuffers);
 
         // Inicialmente nenhum bloco está disponível.
         disponiveis = new HashSet<>(totalBuffers);
-
-        // Inicia estrutura que mantém relação entre bloco e buffer.
-        bb = new Bloco[totalBuffers];
-        for (int i = 0; i < totalBuffers; i++) {
-            Bloco bloco = new Bloco(new BufferByteBuffer());
-            bb[i].bloco = Integer.MIN_VALUE;
-            bb[i].contador = 0;
-            bb[i] = bloco;
-
-            blocos.put(Integer.MIN_VALUE + i, bb[i]);
-        }
 
         lru = new LRU(totalBuffers);
 
@@ -186,17 +175,17 @@ public class BufferManager {
     public Buffer lock(int blocoId) {
 
         // -------------------------------------------------------
-        // CENARIO BLOCO DISPONIVEL
+        // CENARIO BLOCO LOCKED
         // Acrescente contador (referência adicional para o bloco)
         // Retorna o buffer correspondente.
-        Bloco bloco = blocos.get(blocoId);
+        Bloco bloco = locked.get(blocoId);
         if (bloco != null) {
             bloco.contador++;
             return bloco.buffer;
         }
 
         // -------------------------------------------------------
-        // CENARIO BLOCO NAO DISPONIVEL
+        // CENARIO BLOCO UNLOCKED
 
         // REGIÃO CRÍTICA
         // 1. Recupere o buffer unlocked (LRU)
@@ -204,12 +193,19 @@ public class BufferManager {
         // 3. Remove da LRU o buffer recuperado.
         // END REGIÃO CRÍTICA
 
-        // 3. Carregue os dados do bloco no buffer (assíncrona).
-        // 4. Define contador de referência com o valor 1.
-        // 5. Aguarda carga dos dados no buffer.
-        // 6. Retorna buffer liberado para uso.
+        bloco = lru.get();
 
-        return buffers[0];
+        // 3. Carregue os dados do bloco no buffer (assíncrona).
+
+        // 4. Define contador de referência com o valor 1.
+        bloco.contador = 1;
+
+        // 5. Acrescenta bloco entre os locked
+        locked.put(blocoId, bloco);
+
+        // 6. Aguarda carga dos dados no buffer.
+        // 7. Retorna buffer liberado para uso.
+        return bloco.buffer;
     }
 
     /**
@@ -225,7 +221,7 @@ public class BufferManager {
      */
     public void unlock(int blocoId) {
 
-        Bloco bloco = blocos.get(blocoId);
+        Bloco bloco = locked.get(blocoId);
         if (bloco == null) {
             return;
         }
@@ -233,10 +229,11 @@ public class BufferManager {
         // Decrementa contador de referência.
         bloco.contador--;
 
-        // Se não houver mais referências,
-        // então pode ser reutilizado.
+        // Se não houver mais referências ao bloco,
+        // então sai de locked para unlocked.
         if (bloco.contador == 0) {
-            // Acrescenta na fila LRU como o mais recentemente usado.
+            lru.add(bloco);
+            locked.remove(blocoId);
         }
     }
 }

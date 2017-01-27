@@ -74,4 +74,24 @@ public interface ArquivoManager {
      *               qualquer serviço oferecido seja executado.
      */
     void start(Object[] params);
+
+    /**
+     * Registra o nome de arquivo, cujo handle correspondente,
+     * empregado pelas demais operações oferecidas, é retornado.
+     *
+     * @param filename Nome do arquivo (identificador) para o quel
+     *                 o handle deve ser criado.
+     *
+     * @return O handle, valor inteiro único correspondente ao
+     * arquivo.
+     */
+    int register(String filename);
+
+    /**
+     * Elimina o registro do arquivo cujo handle é fornecido.
+     *
+     * @param handle O handle do arquivo cujo registro deve
+     *               ser removido.
+     */
+    void unregister(int handle);
 }

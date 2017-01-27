@@ -52,6 +52,16 @@ public class FileSystemJava implements ArquivoManager, Closeable {
     }
 
     @Override
+    public int register(String filename) {
+        return 0;
+    }
+
+    @Override
+    public void unregister(int handle) {
+
+    }
+
+    @Override
     public void close() throws IOException {
 
     }
