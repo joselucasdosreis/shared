@@ -16,12 +16,37 @@ import java.nio.ByteBuffer;
  * armazenada em meio secundário, juntamente com operações
  * pertinentes.
  *
+ * <p>Uma instância dessa classe deve ser projetada de tal
+ * forma a favorecer a reutilização da mesma para uma sequência
+ * distinta daquela inicialmente utilizada (referenciada).
+ * Dessa forma, abre-se a possibilidade de redução da pressão sobre
+ * o GC.
+ *
  * <p>As operações são baseadas na perspectiva do Cliente
  * (código que faz uso dessa interface), sem referência explícita
  * ou dependência para o real meio empregado para armazenar ou
  * consultar tais sequências de bytes.
  */
 public interface Arquivo {
+
+    /**
+     * Abre o arquivo, tanto para leitura quanto para escrita.
+     *
+     * @param nome O nome do arquivo.
+     *
+     * @return {@code true} se o arquivo foi aberto corretamente, ou
+     * {@code false}, caso contrário.
+     */
+    boolean abre(String nome);
+
+    /**
+     * Fecha o arquivo, cujas operações de leitura/escrita correspondentes
+     * tornam-se indisponíveis.
+     *
+     * @return {@code true} se o arquivo foi fechado e {@code false},
+     * caso contrário.
+     */
+    boolean fecha();
 
     /**
      * Acrescenta o conteúdo do buffer, desde o primeiro byte
@@ -66,16 +91,15 @@ public interface Arquivo {
      * @param posicao Posição inicial do arquivo a partir da qual bytes
      *                serão lidos.
      *
+     * @return Quantidade de bytes carregados.
+     *
      * @see #carrega(byte[], int)
      */
-    void carrega(ByteBuffer buffer, int posicao);
+    int carrega(ByteBuffer buffer, int posicao);
 
     /**
-     * Obtém do arquivo o total de bytes, a partir de determinada posição, e
-     * os deposita em um buffer.
-     *
-     * <p>Espera-se que o buffer possua espaço suficiente para
-     * carregar o total de bytes a ser carregado.
+     * Obtém do arquivo o total de bytes do buffer, a partir de determinada
+     * posição, e os deposita no buffer.
      *
      * @param buffer Vetor de bytes no qual o conteúdo lido do arquivo será
      *               depositado.
@@ -83,9 +107,12 @@ public interface Arquivo {
      * @param posicao Posição inicial no arquivo a partir da qual bytes serão
      *                lidos.
      *
+     * @return Quantidade de bytes carregados. Pode ser valor inferior ao
+     * tamanho do buffer (em caso de falha).
+     *
      * @see #carrega(ByteBuffer, int)
      */
-    void carrega(byte[] buffer, int posicao);
+    int carrega(byte[] buffer, int posicao);
 
     /**
      * Deposita no arquivo, a partir da posição indicada, o total de
@@ -97,9 +124,12 @@ public interface Arquivo {
      * @param posicao Posição inicial no arquivo a partir da qual
      *                bytes serão escritos.
      *
+     * @return Quantidade de bytes escritos, em caso de falha, pode
+     * ser inferior ao total requisitado.
+     *
      * @see #escreve(byte[], int)
      */
-    void escreve(ByteBuffer buffer, int posicao);
+    int escreve(ByteBuffer buffer, int posicao);
 
     /**
      * Deposita no arquivo, a partir da posição indicada, o total de
@@ -111,7 +141,17 @@ public interface Arquivo {
      * @param posicao Posição inicial no arquivo a partir da qual
      *                bytes serão escritos.
      *
+     * @return Quantidade de bytes escritos, em caso de falha, pode
+     * ser inferior ao total requisitado.
+     *
      * @see #escreve(ByteBuffer, int)
      */
-    void escreve(byte[] buffer, int posicao);
+    int escreve(byte[] buffer, int posicao);
+
+    /**
+     * Recupera o nome (identificador) do arquivo.
+     *
+     * @return O nome (identificador) único do arquivo.
+     */
+    String filename();
 }
