@@ -9,7 +9,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ArquivoManagerTest {
+public class ArquivoManagerJavaTest {
 
     private String dir = getClass().getResource(".").getFile();
 
@@ -49,6 +49,38 @@ public class ArquivoManagerTest {
             am.unregister(handle);
             assertNull(am.filename(handle));
         }
+    }
+
+    @Test
+    public void semEfeitoUnregisterDeArquivoNaoRegistrado() {
+        ArquivoManagerJava amj = new ArquivoManagerJava();
+        amj.start();
+
+        amj.unregister(Integer.MAX_VALUE);
+    }
+
+    @Test
+    public void naoHaComoCriarArquivoHandleInvalido() {
+        ArquivoManagerJava amj = new ArquivoManagerJava();
+        amj.start();
+
+        assertFalse(amj.cria(Integer.MAX_VALUE));
+    }
+
+    @Test
+    public void naoHaComoRemoverArquivoHandleInvalido() {
+        ArquivoManagerJava amj = new ArquivoManagerJava();
+        amj.start();
+
+        assertFalse(amj.remove(Integer.MAX_VALUE));
+    }
+
+    @Test
+    public void handleInvalidoArquivoNull() {
+        ArquivoManagerJava amj = new ArquivoManagerJava();
+        amj.start();
+
+        assertNull(amj.get(Integer.MAX_VALUE));
     }
 
     @Test

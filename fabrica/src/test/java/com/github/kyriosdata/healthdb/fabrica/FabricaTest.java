@@ -8,7 +8,7 @@ public class FabricaTest {
     private String dir = getClass().getResource(".").getFile();
 
     @Test
-    public void casoTrivial() {
+    public void casoTrivial() throws Exception {
         Log log = Fabrica.newInstance(Log.class);
         log.start(dir + "teste.log");
 

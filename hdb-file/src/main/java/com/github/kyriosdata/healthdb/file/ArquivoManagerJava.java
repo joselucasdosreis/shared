@@ -9,7 +9,6 @@
 
 package com.github.kyriosdata.healthdb.file;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -82,7 +81,7 @@ public class ArquivoManagerJava implements ArquivoManager {
         try {
             Files.createFile(Paths.get(filename(handle)));
             return true;
-        } catch (IOException exp) {
+        } catch (Exception exp) {
             return false;
         }
     }
@@ -92,7 +91,7 @@ public class ArquivoManagerJava implements ArquivoManager {
         try {
             Files.deleteIfExists(Paths.get(filename(handle)));
             return true;
-        } catch (IOException e) {
+        } catch (Exception e) {
             return false;
         }
     }
@@ -121,10 +120,10 @@ public class ArquivoManagerJava implements ArquivoManager {
             return;
         }
 
-        // Fecha o arquivo
-        fecha(handle);
-
         handleToArquivo.remove(handle);
         nomeToHandle.remove(arquivo.filename());
+
+        // Fecha o arquivo
+        fecha(handle);
     }
 }
