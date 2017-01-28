@@ -11,5 +11,14 @@
 
     <artifactId>hdb-file</artifactId>
 
+    <dependencies>
+
+        <dependency>
+            <groupId>com.github.kyriosdata.hdb</groupId>
+            <artifactId>fabrica</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
+    </dependencies>
 
 </project>

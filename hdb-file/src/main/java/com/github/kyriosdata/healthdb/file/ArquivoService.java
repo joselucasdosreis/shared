@@ -9,7 +9,8 @@
 
 package com.github.kyriosdata.healthdb.file;
 
-import java.io.Closeable;
+import com.github.kyriosdata.healthdb.fabrica.Modulo;
+
 import java.nio.ByteBuffer;
 
 /**
@@ -33,7 +34,7 @@ import java.nio.ByteBuffer;
  * {@link #fecha(int)}, os serviços de leitura/escrita no arquivo
  * tornam-se indisponíveis.
  */
-public interface ArquivoService extends Closeable {
+public interface ArquivoService extends Modulo {
 
     /**
      * Prepara (inicializa) o serviço de arquivos.

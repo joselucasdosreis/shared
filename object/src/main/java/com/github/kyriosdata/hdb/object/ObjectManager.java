@@ -16,10 +16,10 @@ package com.github.kyriosdata.hdb.object;
 public class ObjectManager {
 
     public ObjectsPool pool;
-    public BufferManager bm;
+    public BufferService bm;
 
-    public ObjectManager(BufferManager bufferManager, ObjectsPool colecao) {
-        bm = bufferManager;
+    public ObjectManager(BufferService bufferService, ObjectsPool colecao) {
+        bm = bufferService;
         pool = colecao;
     }
 

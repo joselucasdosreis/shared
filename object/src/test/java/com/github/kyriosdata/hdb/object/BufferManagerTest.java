@@ -12,7 +12,7 @@ public class BufferManagerTest {
         BufferManager bm = new BufferManager();
         bm.start(1);
 
-        Buffer buffer = bm.lock(1234);
+        Buffer buffer = bm.lock(0, 1234);
     }
 
     @Test
@@ -20,15 +20,15 @@ public class BufferManagerTest {
         BufferManager bm = new BufferManager();
         bm.start(1);
 
-        Buffer b1 = bm.lock(987);
+        Buffer b1 = bm.lock(0, 987);
         assertNotNull(b1);
 
-        Buffer b2 = bm.lock(987);
+        Buffer b2 = bm.lock(0, 987);
         assertNotNull(b2);
 
         assertEquals(b1, b2);
 
-        bm.unlock(987);
-        bm.unlock(987);
+        bm.unlock(0, 987);
+        bm.unlock(0, 987);
     }
 }

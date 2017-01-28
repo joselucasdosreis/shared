@@ -9,6 +9,7 @@
 
 package com.github.kyriosdata.hdb.object;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,39 +17,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Uma base de dados pode estar organizada em um ou mais
- * arquivos. Um arquivos pode ser suficientemente extenso o
- * para inviabilizar a sua transferência do seu conteúdo para
- * a memória RAM. A transferência é necessária para processar
- * o conteúdo da base de dados. A solução é transferir um bloco,
- * uma parte do conteúdo.
- * <p>
- * <p>Dado que não é assegurada a possibilidade de manter em RAM
- * o conteúdo completo de um arquivo, cada arquivo é dividido em
- * locked de tamanho fixo ({@link Constantes#BUFFER_SIZE}). Ao
- * contrário do conteúdo do qual é obtido, um bloco pode ser
- * transferido para a memória e, no sentido inverso, persistido.
- * <p>
- * <p>O <i>Buffer Manager</i> (BM) é responsável por transferir para a
- * memória RAM um bloco requisitado e, no sentido inverso, persistir
- * um bloco presente em RAM. Um bloco é mantido em RAM em um <i>buffer</i>.
- * Naturalmente, o número de rawBuffers empregados pelo BM é limitado.
- * Cabe ao BM, quando necessário, identificar um buffer (e o bloco
- * correspondente) cujo conteúdo será substituído pelo conteúdo de
- * outro bloco, cujo acesso é requisitado ao BM. A estratégia do
- * bloco de uso mais antigo é empregada nesse caso ({@link LRU}).
- * <p>
- * <p>A requisição de um bloco (<i>buffer</i>) decorre das operações
- * de consultas e atualizações de dados requisitadas por clientes. As
- * operações básicas são: (a) lock e (b) unlock. A primeira carrega um
- * bloco, caso já não esteja disponível e a segunda "libera" o buffer
- * do bloco correspondente para ser eventualmente reutilizado em
- * posterior operação de lock.
- * <p>
- * <p>O cliente do BM é resonsável por executar a operação unlock para
- * cada operação de lock realizada. Convém destacar que, enquanto a
- * operação de unlock não é realizada, o BM tenderá a manter o bloco
- * correspondente em uso.
+ * Implementação do serviço de gerência de buffers.
  *
  * <h3>Análise de cenários possíveis para as duas operações</h3>
  * <ul>
@@ -71,7 +40,7 @@ import java.util.Set;
  * <li>Unlock. Torna o buffer livre para reutilização.</li>
  * </ul>
  */
-public class BufferManager {
+public class BufferManager implements BufferService {
 
     private ByteBuffer[] rawBuffers;
     private byte[][] rawBytes;
@@ -136,10 +105,27 @@ public class BufferManager {
     }
 
     /**
-     * Disponibiliza buffer para uso contendo um dado bloco.
+     * Registra o arquivo do qual o conteúdo de blocos serão
+     * requisitados.
+     *
+     * @param arquivo O nome (identificador) do arquivo.
+     *
+     * @return O handle do arquivo a ser empregado como argumento
+     * nas demais operações.
+     *
+     * @see #lock(int, int)
+     * @see #unlock(int, int)
+     */
+    @Override
+    public int register(String arquivo) {
+        return 0;
+    }
+
+    /**
+     * Disponibiliza buffer contendo o bloco do arquivo.
      * Essa operação deve ser executada para cada bloco cujos
      * dados serão consultados.
-     * <p>
+     *
      * <p>Esse método irá aguardar, caso não esteja disponível,
      * buffer para que o conteúdo do bloco seja carregado. Por outro
      * lado, um buffer pode estar disponível, o que assegura o
@@ -148,10 +134,10 @@ public class BufferManager {
      * nesse caso, o retorno é imediato.
      * <p>
      * <p>A chamada a esse método para um dado bloco exige a
-     * posterior chamada ao método {@link #unlock(int)} para o
+     * posterior chamada ao método {@link #unlock(int, int)} para o
      * mesmo bloco. Caso contrário o bloco estará indisponível para
      * reutilização. De fato, esse cenário persiste enquanto o
-     * método {@link #unlock(int)}} não é chamado.
+     * método {@link #unlock(int, int)}} não é chamado.
      * <p>
      * <p>Um uso eficiente, portanto, deve ser similar àquele
      * ilustrado abaixo.
@@ -168,11 +154,15 @@ public class BufferManager {
      * }
      * </pre>
      *
+     * @param fileId O identificador do arquivo.
      * @param blocoId O bloco que identifica o conteúdo do buffer.
      * @return Buffer disponível para uso.
-     * @see #unlock(int)
+     *
+     * @see #unlock(int, int)
+     * @see #register(String)
      */
-    public Buffer lock(int blocoId) {
+    @Override
+    public Buffer lock(int fileId, int blocoId) {
 
         // -------------------------------------------------------
         // CENARIO BLOCO LOCKED
@@ -211,15 +201,20 @@ public class BufferManager {
     /**
      * Libera o bloco pela <i>thread</i> em questão.
      * Esse método deve ser chamado para cada chamada ao método
-     * {@link #lock(int)}}.
+     * {@link #lock(int, int)}}.
      * <p>
      * <p>Não necessariamente o buffer utilizado pela <i>thread</i>
      * poderá ser reutilizado, dado que outras <i>threads</i> também
      * podem estar consultando o mesmo bloco.
      *
+     * @param fileId O identificador do arquivo.
      * @param blocoId Identificador do bloco a ser liberado.
+     *
+     * @see #lock(int, int)
+     * @see #register(String)
      */
-    public void unlock(int blocoId) {
+    @Override
+    public void unlock(int fileId, int blocoId) {
 
         Bloco bloco = locked.get(blocoId);
         if (bloco == null) {
@@ -235,5 +230,15 @@ public class BufferManager {
             lru.add(bloco);
             locked.remove(blocoId);
         }
+    }
+
+    @Override
+    public void start(Object... params) {
+
+    }
+
+    @Override
+    public void close() throws IOException {
+
     }
 }
