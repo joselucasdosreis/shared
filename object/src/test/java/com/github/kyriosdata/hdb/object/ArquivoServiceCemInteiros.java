@@ -23,7 +23,7 @@ import java.util.Random;
  *
  * APENAS PARA LEITURA, APENAS METODOS CARREGA.
  */
-public class ArquivoServiceParaTeste implements ArquivoService {
+public class ArquivoServiceCemInteiros implements ArquivoService {
 
     private int unicoArquivoHandle;
 
@@ -35,7 +35,7 @@ public class ArquivoServiceParaTeste implements ArquivoService {
     /**
      * Cria conteúdo do único arquivo.
      */
-    public ArquivoServiceParaTeste() {
+    public ArquivoServiceCemInteiros() {
         for (int i = 1; i <= 100; i++) {
             int posicao = (i - 1) * 4;
             bb.putInt(posicao, i);
@@ -97,18 +97,19 @@ public class ArquivoServiceParaTeste implements ArquivoService {
 
     @Override
     public int carrega(int handle, ByteBuffer buffer, int posicao) {
-        return 0;
+        return carrega(handle, buffer.array(), posicao);
     }
 
     @Override
     public int carrega(int handle, byte[] buffer, int posicao) {
-        int tamanho  = buffer.length;
 
-        for(int i = posicao; i < 100; i++) {
-
+        int destino = 0;
+        int tamanho = buffer.length;
+        for(int i = posicao; i < 100 && destino < tamanho; i++) {
+            buffer[destino++] = dados[i];
         }
 
-        return 0;
+        return destino;
     }
 
     @Override

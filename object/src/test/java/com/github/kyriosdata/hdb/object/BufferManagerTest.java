@@ -14,7 +14,13 @@ public class BufferManagerTest {
     // Parâmetros para o serviço de buffer
     private final int BUFFER_SIZE = 10;
     private final int TOTAL_BUFFERS = 3;
-    private final ArquivoService as = new ArquivoServiceParaTeste();
+
+    // Oferece acesso a um arquivo de 100 inteiros (1, 2, ..., 100).
+    private final ArquivoService as = new ArquivoServiceCemInteiros();
+
+    // TOTAL DE INTEIROS: 100 * 4 = 400 bytes
+    // TOTAL DE BLOCOS: 40 (de 10 bytes cada)
+    // BLOCOS: 0..39
 
     BufferManager bm;
 
@@ -25,11 +31,21 @@ public class BufferManagerTest {
     }
 
     @Test
-    public void blocoRecuperadoUsadoLiberado() {
+    public void inteiroPodeSerFragmentadoAoMeio() {
         String fn = dir + "inteirosDeUmAteCem.dat";
 
         int handle = bm.register(fn);
-        Buffer buffer = bm.lock(handle, 1234);
+
+        // Bloco 0
+        // Contém: 1, 2 completamente nesse bloco, além de
+        // 2 bytes do terceiro inteiro que, juntamente com 2
+        // bytes do segundo bloco, perfazem o valor 3.
+
+        Buffer buffer = bm.lock(handle, 0);
+
+        assertEquals(1, buffer.int32(0));
+        assertEquals(2, buffer.int32(4));
+        assertEquals(3, buffer.int32(8));
     }
 
     @Test
