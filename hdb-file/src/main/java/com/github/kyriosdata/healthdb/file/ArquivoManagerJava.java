@@ -121,7 +121,7 @@ public class ArquivoManagerJava implements ArquivoManager {
     public int register(String filename) {
         Integer handle = nomeToHandle.get(filename);
         if (handle == null) {
-            int newHandle = handleGenerator.decrementAndGet();
+            int newHandle = handleGenerator.incrementAndGet();
             nomeToHandle.put(filename, newHandle);
 
             Arquivo arquivo = new ArquivoJava();
