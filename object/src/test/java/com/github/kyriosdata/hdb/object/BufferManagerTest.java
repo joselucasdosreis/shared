@@ -7,12 +7,17 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class BufferManagerTest {
 
+    private String dir = getClass().getResource(".").getFile();
+
     @Test
     public void blocoRecuperadoUsadoLiberado() {
+        String fn = dir + "blocorecuperado.dat";
+
         BufferManager bm = new BufferManager();
         bm.start(1);
 
-        Buffer buffer = bm.lock(0, 1234);
+        int handle = bm.register(fn);
+        Buffer buffer = bm.lock(handle, 1234);
     }
 
     @Test

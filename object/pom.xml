@@ -31,6 +31,12 @@
             <version>1.0.0</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.github.kyriosdata.hdb</groupId>
+            <artifactId>hdb-file</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
     </dependencies>
 
 </project>

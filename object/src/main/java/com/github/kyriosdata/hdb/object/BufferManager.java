@@ -9,6 +9,8 @@
 
 package com.github.kyriosdata.hdb.object;
 
+import com.github.kyriosdata.healthdb.file.ArquivoService;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
@@ -69,6 +71,17 @@ public class BufferManager implements BufferService {
     private Map<Integer, Bloco> locked;
 
     /**
+     * Serviço de manipulação de arquivos a ser utilizado
+     * pelo serviço de buffers.
+     */
+    private ArquivoService as;
+
+    /**
+     * Tamanho do buffer (buffer size).
+     */
+    private int bs;
+
+    /**
      * Conjunto de buffers e os locked associados.
      */
     private Bloco[] bb;
@@ -76,10 +89,21 @@ public class BufferManager implements BufferService {
     /**
      * Executa operações de inicialização do BM.
      *
-     * @param totalBuffers Total de locked (<i>rawBuffers</i>) a serem
-     *                     gerenciados pelo BM.
+     * @param params Parâmetros a serem oferecidos na inicialização
+     *               da instância. Os seguintes argumentos são esperados,
+     *               na seguinte ordem: (a) tamanho do buffer (Integer);
+     *               (b) total de buffers (Integer) e (c) serviço de
+     *               arquivos a ser utilizado.
      */
-    public void start(int totalBuffers) {
+    @Override
+    public void start(Object ... params) {
+
+        // Inicialização do serviço (parâmetros fornecidos)
+        bs = (Integer)params[0];
+        int totalBuffers = (Integer)params[1];
+        as = (ArquivoService)params[2];
+
+        // Inicialização do serviço (informações internas)
 
         locked = new HashMap<>(totalBuffers);
 
@@ -230,11 +254,6 @@ public class BufferManager implements BufferService {
             lru.add(bloco);
             locked.remove(blocoId);
         }
-    }
-
-    @Override
-    public void start(Object... params) {
-
     }
 
     @Override
