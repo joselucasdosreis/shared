@@ -36,7 +36,7 @@ import java.nio.ByteBuffer;
 public interface ArquivoService extends Closeable {
 
     /**
-     * Prepara o administrador (gerente) de arquivos.
+     * Prepara (inicializa) o serviço de arquivos.
      * Argumentos devem variar conforme a implementação.
      * Por exemplo, se Azure Blobs são empregados, então
      * entre os parâmetros é razoável a presença de credencial
@@ -46,7 +46,7 @@ public interface ArquivoService extends Closeable {
      *               Esse método deve ser chamado antes que
      *               qualquer serviço oferecido seja executado.
      */
-    void start(Object[] params);
+    void start(Object... params);
 
     /**
      * Registra o nome de arquivo, cujo handle correspondente,
