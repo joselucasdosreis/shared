@@ -18,11 +18,11 @@ import java.io.Closeable;
  *     <li>Possuir um construtor padrão (default).</li>
  *     <li>Após a criação de uma instância de um módulo o método
  *     {@link #start(Object...)} é chamado para deixar o objeto
- *     "pronto" para uso dos clientes da referência.</li>
+ *     "pronto" para uso dos clientes de referência.</li>
  *     <li>Quando a instância do módulo não for mais necessária,
  *     possivelmente após requisição de <i>shutdown</i>, o método
  *     {@link Closeable#close()} será chamado, dando oportunidade
- *     para a instância liberar re cursos (operações de finalização).</li>
+ *     para a instância liberar recursos (operações de finalização).</li>
  * </ul>
  */
 public interface Modulo extends Closeable {
