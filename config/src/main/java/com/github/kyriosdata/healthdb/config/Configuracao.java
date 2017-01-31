@@ -11,6 +11,7 @@ package com.github.kyriosdata.healthdb.config;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -81,7 +82,7 @@ public class Configuracao {
         }
     }
 
-    private void getPropriedades(String filename) throws IOException {
+    private void getPropriedades(String filename) throws IOException, URISyntaxException {
 
         Path path = getConfigFilePath(filename);
         if (path == null) {
@@ -161,11 +162,11 @@ public class Configuracao {
      * arquivo contendo a configuração a ser carregada.
      * @throws NullPointerException Se o argumento é {@code null}.
      */
-    private static Path getConfigFilePath(String filename) {
+    private static Path getConfigFilePath(String filename) throws URISyntaxException {
 
         URL url = ClassLoader.getSystemResource(filename);
 
-        Path path = Paths.get(url != null ? url.getFile() : filename);
+        Path path = url != null ? Paths.get(url.toURI()) : Paths.get(filename);
 
         return Files.exists(path) ? path : null;
     }
