@@ -12,39 +12,44 @@ package com.github.kyriosdata.healthdb.fabrica;
 import java.util.ServiceLoader;
 
 /**
- * Fábrica de objetos que são "pontos de extensão".
+ * Fábrica de objetos que implementam "pontos de extensão".
  *
  * <p>A presente classe é recomendada para permitir a criação de
- * instâncias a partir de classes "desconhecidas". Por exemplo,
- * um classe que implementa uma determinada interface, mas que
- * é fornecida em arquivo .jar específico, desconhecido em
- * tempo de compilação ou cuja dependência para a classe que
- * implementa a interface não deve existir.
+ * instâncias de {@link Modulo}. Um módulo é a implementação de
+ * um ponto de extensão, desconhecido do cliente que o usa por
+ * meio de uma interface de interesse. Ao contrário da implementação,
+ * a interface é conhecida pela presente classe.
  */
 public class Fabrica {
 
     /**
-     * Carrega o serviço do tipo fornecido.
-     * @param api
-     * @param <T>
+     * Cria uma instância do tipo indicado. A primeira classe encontrada
+     * que implementa o tipo é utilizada.
+     *
+     * @param classe Classe do tipo de interesse.
+     *
+     * @param <T> Interface cuja implementação é requisitada. Não é a
+     *            interface {@link Modulo}, mas a interface de interesse
+     *            do domínio em questão.
      * @return
      */
-    public static <T> T newInstance(Class<T> api) {
+    public static <T> T newInstance(Class<T> classe) {
 
-        T result = null;
+        T instancia = null;
 
-        ServiceLoader<T> impl = ServiceLoader.load(api);
+        ServiceLoader<T> fornecedores = ServiceLoader.load(classe);
 
-        for (T loadedImpl : impl) {
-            result = loadedImpl;
-            if ( result != null ) break;
+        for (T fornecedor : fornecedores) {
+            if (fornecedor != null) {
+                instancia = fornecedor;
+                break;
+            }
         }
 
-        if ( result == null ) {
-            throw new RuntimeException(
-                    "Cannot find implementation for: " + api);
+        if (instancia == null) {
+            throw new RuntimeException("class not found for " + classe);
         }
 
-        return result;
+        return instancia;
     }
 }
