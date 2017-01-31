@@ -11,7 +11,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class LoggingTest {
 
-    private String dir = getClass().getResource(".").getFile();
+    private static final boolean WINDOWS = System.getProperty("os.name").contains("indow");
+    private String classDir = getClass().getResource(".").getFile();
+    private String dir = WINDOWS ? classDir.substring(1) : classDir;
     private String file = dir + "teste.log";
 
     @Test
