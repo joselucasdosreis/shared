@@ -40,8 +40,10 @@ public class Fabrica {
             if ( result != null ) break;
         }
 
-        if ( result == null ) throw new RuntimeException(
-                "Cannot find implementation for: " + api);
+        if ( result == null ) {
+            throw new RuntimeException(
+                    "Cannot find implementation for: " + api);
+        }
 
         return result;
     }
