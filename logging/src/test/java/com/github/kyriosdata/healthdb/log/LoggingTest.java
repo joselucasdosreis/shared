@@ -4,6 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
@@ -93,7 +94,7 @@ public class LoggingTest {
     }
 
     @Test
-    public void reutilizandoByteBuffer() {
+    public void reutilizandoByteBuffer() throws UnsupportedEncodingException {
         Logging log = new Logging();
 
         byte[] saude = "saúde".getBytes(StandardCharsets.UTF_8);
@@ -104,7 +105,8 @@ public class LoggingTest {
         log.transferToBuffer(buffer, saude, saude.length - 1);
         log.transferToBuffer(buffer, vida, vida.length - 1);
 
-        assertEquals("saúdevida", new String(buffer.array()));
+        String recuperado = new String(buffer.array(), "UTF-8");
+        assertEquals("saúdevida", recuperado);
     }
 }
 

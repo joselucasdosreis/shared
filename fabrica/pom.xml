@@ -30,6 +30,7 @@
             <groupId>com.github.kyriosdata.hdb</groupId>
             <artifactId>logging</artifactId>
             <version>1.0.0</version>
+            <scope>runtime</scope>
         </dependency>
 
     </dependencies>
